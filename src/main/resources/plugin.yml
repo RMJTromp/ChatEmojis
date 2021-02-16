@@ -1,0 +1,27 @@
+name: ChatEmojis
+version: ${project.version}
+main: com.rmjtromp.chatemojis.ChatEmojis
+api-version: 1.16
+authors: [ RMJTromp ]
+soft-depend: [ PlaceholderAPI ]
+
+commands:
+  emoji:
+    usage: <command>
+    aliases: emojis
+    description: Shows a list of emojis
+
+permissions:
+  chatemojis.command:
+    description: permission to use emoji command
+    default: true
+  chatemojis.use.*:
+    description: permission to use all emojis
+    default: op
+  chatemojis.*:
+    description: permission to list and use all emojis
+    default: op
+    children:
+      - chatemojis.command
+      - chatemojis.use.*
+
