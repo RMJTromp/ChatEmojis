@@ -27,6 +27,9 @@ ChatEmojis does not hard-depend on any other plugins.
 
 Please note that if you are using PlaceholderAPI, you must also install the PlaceholderAPI Extension corresponding to the placeholder you're trying to access, more about this can be found [here](https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders).
 
+# How to create your own Emoji
+A full tutorial and detailed explanation on how to create your own emoji can be found (here)[https://github.com/Mxlvin/ChatEmojis/wiki/How-to-create-your-own-emoji].
+
 # Emoji List (Screenshot)
 ![List of Emojis](https://i.imgur.com/B0s6wga.png)
 
