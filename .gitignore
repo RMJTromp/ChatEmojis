@@ -112,3 +112,11 @@ buildNumber.properties
 # Common working directory
 run/
 /bin/
+
+#Eclipse
+.settings/
+.project
+.classpath
+
+# Other
+assets/
