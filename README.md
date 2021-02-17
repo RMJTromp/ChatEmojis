@@ -33,6 +33,9 @@ A full tutorial and detailed explanation on how to create your own emoji can be 
 # Emoji List (Screenshot)
 ![List of Emojis](https://i.imgur.com/B0s6wga.png)
 
+# Official Resouce Links
+[SpigotMC](https://www.spigotmc.org/resources/chatemojis.88027/), [MC-Market](https://www.mc-market.org/resources/19063/).
+
 # License
 This project is subject to the [GNU General Public License v3.0](https://github.com/Mxlvin/ChatEmojis/blob/main/LICENSE). This does only apply for source code located directly in this clean repository.
 For those who are unfamiliar with the license, here is a summary of its main points. This is by no means legal advice nor legally binding.
