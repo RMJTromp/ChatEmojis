@@ -1,4 +1,3 @@
-
 hypixel:
   basic:
     heart:
@@ -118,4 +117,4 @@ music:
   emoji: ['&c♫', '&9♬', '&3♪', '&5♩', '&a♭', '&e♪'] 
 playername:
   emoticon: ':playername:'
-  emoji: '%player_name%'
+  emoji: '&9%player_name%'
