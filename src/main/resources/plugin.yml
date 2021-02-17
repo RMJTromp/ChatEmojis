@@ -13,15 +13,27 @@ commands:
 
 permissions:
   chatemojis.command:
-    description: permission to use emoji command
+    description: permission to use list all emojis (deprecated)
+    default: false
+  chatemojis.list:
+    description: permission to use list all emojis
     default: true
   chatemojis.use.*:
     description: permission to use all emojis
     default: op
+  chatemojis.reload:
+    description: permission to reload emojis
+    default: op
+  chatemojis.admin:
+    description: permission to make changes to settings
+    default: op
+    children:
+      - chatemojis.reload
   chatemojis.*:
     description: permission to list and use all emojis
     default: op
     children:
-      - chatemojis.command
+      - chatemojis.list
       - chatemojis.use.*
+      - chatemojis.admin
 
