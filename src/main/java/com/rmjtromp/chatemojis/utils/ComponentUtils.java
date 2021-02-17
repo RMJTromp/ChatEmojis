@@ -1,8 +1,12 @@
 package com.rmjtromp.chatemojis.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.ChatColor;
+
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 
 public final class ComponentUtils {
 
@@ -38,19 +42,10 @@ public final class ComponentUtils {
      * @param arg0
      * @return
      */
-    @SuppressWarnings("unused")
     public static TextComponent[] createComponents(Iterable<String> arg0) {
-        int size = 0;
-        for(String arg : arg0) size++;
-        String[] components = new String[size];
-
-        int i = 0;
-        for(String arg : arg0) {
-            components[i] = arg;
-            i++;
-        }
-
-        return createComponents(components);
+        List<String> c = new ArrayList<>();
+        arg0.forEach(c::add);
+        return createComponents(c.toArray(new String[0]));
     }
 
     /**
@@ -70,9 +65,9 @@ public final class ComponentUtils {
      * @return
      */
     public static TextComponent mergeComponents(Iterable<TextComponent> arg0) {
-        TextComponent component = new TextComponent();
-        for(TextComponent arg : arg0) component.addExtra(arg);
-        return component;
+        List<TextComponent> c = new ArrayList<>();
+        arg0.forEach(c::add);
+        return mergeComponents(c.toArray(new TextComponent[0]));
     }
 
     /**
@@ -93,7 +88,11 @@ public final class ComponentUtils {
      */
     public static TextComponent joinComponents(String arg0, TextComponent ...arg1) {
         TextComponent component = new TextComponent();
-        for(TextComponent arg : arg1) component.addExtra(mergeComponents(createComponent(arg0), arg));
+        for(int i = 0; i < arg1.length; i++) {
+        	TextComponent arg = arg1[i];
+        	if(i < 1) component.addExtra(arg);
+        	else component.addExtra(mergeComponents(createComponent(arg0), arg));
+        }
         return component;
     }
 
@@ -104,9 +103,9 @@ public final class ComponentUtils {
      * @return
      */
     public static TextComponent joinComponents(String arg0, Iterable<TextComponent> arg1) {
-        TextComponent component = new TextComponent();
-        for(TextComponent arg : arg1) component.addExtra(mergeComponents(createComponent(arg0), arg));
-        return component;
+        List<TextComponent> c = new ArrayList<>();
+        arg1.forEach(c::add);
+        return joinComponents(arg0, c.toArray(new TextComponent[0]));
     }
 
 }
