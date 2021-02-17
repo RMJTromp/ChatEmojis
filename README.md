@@ -5,15 +5,21 @@ ChatEmojis allows you to add your own emojis in the config file and supports mul
 **Required Java Version:** Java 8+
 
 # Commands
-| Command | Aliases | Description | Permission |
-| ------ | ------ | ------ | ------ |
-| /emoji | /emojis | Shows list of emojis | chatemojis.command |
+| Command | Description | Permission |
+| ------  | ------ | ------ |
+| `/emoji [list]` | Shows list of emojis | `chatemojis.list` |
+| `/emoji help` | Shows list of commands | none |
+| `/emoji reload` | Reloads all emojis | `chatemojis.reload` |
+| `/emoji version` | Shows the plugin's version | none |
+| `/emoji settings` | Shows list of emojis | `chatemojis.admin` |
 
 # Permissions
 | Permission Node | Default | Description
 | ------ | ------ | ------ |
-| chatemojis.command | Everyone | Allowes access to use /emoji |
+| chatemojis.list | Everyone | Allowes access to use /emoji [list] |
 | chatemojis.use.* | OP | Permission to use all emojis |
+| chatemojis.reload | OP | Allowes access to reload emojis |
+| chatemojis.admin | OP | Allowes access to change plugin settings |
 | chatemojis.* | OP | Permission to use all emojis and /emoji command |
 
 **Emoji-Specific Permission**:
