@@ -1,8 +1,8 @@
 package com.rmjtromp.chatemojis;
 
 import com.rmjtromp.chatemojis.ChatEmojis.Emojis;
-import com.rmjtromp.chatemojis.ChatEmojis.EmojiGroups;
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import com.rmjtromp.chatemojis.ChatEmojis.EmojiGroups;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import static com.rmjtromp.chatemojis.ChatEmojis.NAME_PATTERN;
 import static com.rmjtromp.chatemojis.ChatEmojis.RESERVED_NAMES;
 
-public class EmojiGroup {
+class EmojiGroup {
 
     private final Emojis emojis = new Emojis();
     private final EmojiGroups groups = new EmojiGroups();
@@ -24,9 +24,9 @@ public class EmojiGroup {
     private final Permission permission;
     private final EmojiGroup parent;
 
-    public final List<String> parentNames = new ArrayList<>();
+    final List<String> parentNames = new ArrayList<>();
 
-    public static EmojiGroup init(ConfigurationSection section) throws ConfigException {
+    static EmojiGroup init(ConfigurationSection section) throws ConfigException {
         return new EmojiGroup(null, Objects.requireNonNull(section));
     }
 
@@ -56,7 +56,7 @@ public class EmojiGroup {
         if(parent != null) permission.addParent(parent.getPermission(), true);
         
         for(String key : section.getKeys(false)) {
-            if(!RESERVED_NAMES.contains(key.toLowerCase())) {
+            if(!RESERVED_NAMES.contains(key.toLowerCase()) || (parent == null && !key.equalsIgnoreCase("settings"))) {
                 ConfigurationSection s = section.getConfigurationSection(key);
                 if(s == null) continue;
                 if(isSetKey(s, "^emoticons?$") && isSetKey(s, "^emojis?$")) {
@@ -86,14 +86,14 @@ public class EmojiGroup {
         return emojis;
     }
 
-    public String parse(Player player, String resetColor, String message) {
+    String parse(Player player, String resetColor, String message) {
         for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message);
         for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message);
         return message;
 
     }
 
-    public List<TextComponent> getComponents(Player player) {
+    List<TextComponent> getComponents(Player player) {
         List<TextComponent> components = new ArrayList<>();
         getGroups().forEach(group -> components.addAll(group.getComponents(player)));
         getEmojis().forEach(emoji -> components.addAll(emoji.getComponent(player)));

@@ -26,8 +26,9 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
-public class Emoji {
+class Emoji {
 
     private static final Pattern REGEX_PATTERN = Pattern.compile("^/(.+)/(i)?$", Pattern.CASE_INSENSITIVE);
     private static final ChatEmojis plugin = ChatEmojis.getInstance();
@@ -40,7 +41,7 @@ public class Emoji {
     private final List<String> emojis = new ArrayList<>();
     private boolean enabled = true;
 
-    public static Emoji init(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
+    static Emoji init(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
         return new Emoji(Objects.requireNonNull(parent), Objects.requireNonNull(section));
     }
 
@@ -68,7 +69,7 @@ public class Emoji {
                         String emoticon;
                         if(obj instanceof String) emoticon = (String) obj;
                         else if(obj instanceof Integer) emoticon = Integer.toString((Integer) obj);
-                        else if(obj instanceof Boolean) emoticon = (Boolean) obj ? "true" : "false";
+                        else if(obj instanceof Boolean) emoticon = Boolean.toString((Boolean) obj);
                         else throw new InvalidEmoticonException("Emoticon type not supported", section);
 
                         if(!emoticon.isEmpty()) emoticons.add(emoticon);
@@ -167,6 +168,14 @@ public class Emoji {
     public boolean isEnabled() {
         return enabled;
     }
+    
+    public void enable() {
+    	enabled = true;
+    }
+    
+    public void disable() {
+    	enabled = false;
+    }
 
     public Permission getPermission() {
         return permission;
@@ -176,7 +185,7 @@ public class Emoji {
         return parent;
     }
 
-    public String parse(Player player, String resetColor, String message) {
+    String parse(Player player, String resetColor, String message) {
         if(isEnabled() && player.hasPermission(getPermission())) {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
@@ -189,14 +198,13 @@ public class Emoji {
         return message;
     }
 
-    @SuppressWarnings("deprecation")
-	public List<TextComponent> getComponent(Player player) {
+	List<TextComponent> getComponent(Player player) {
         List<TextComponent> components = new ArrayList<>();
         TextComponent prefix = ComponentUtils.createComponent("&7  - ");
         emoticons.forEach(emoticon -> {
             TextComponent comp = ComponentUtils.createComponent(String.format("&e%s &7- &f%s", emoticon, getPattern().matcher(emoticon).replaceAll(PlaceholderAPI.setPlaceholders(player, getEmoji()))));
             if(player.isOp()) {
-                comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentUtils.createBaseComponent(String.format("&fPermission Node:\n&7%s\n\n&eClick To Copy!", getPermission().getName()))));
+                comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ComponentUtils.createBaseComponent("&fPermission Node:\n&7"+getPermission().getName()+"\n\n&eClick To Copy!"))));
                 comp.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, getPermission().toString()));
             }
             components.add(ComponentUtils.mergeComponents(prefix, comp));
