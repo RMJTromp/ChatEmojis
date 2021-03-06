@@ -1,120 +1,19 @@
-hypixel:
-  basic:
-    heart:
-      emoticon: '<3'
-      emoji: '&c❤'
-    star:
-      emoticon: ':star:'
-      emoji: '&6✮'
-    yes:
-      emoticon: ':yes:'
-      emoji: '&a✔'
-    no:
-      emoticon: ':no:'
-      emoji: '&c✖'
-    java:
-      emoticon: ':java:'
-      emoji: '&b☕'
-    arrow:
-      emoticon: ':arrow:'
-      emoji: '&e➜'
-    shrug:
-      emoticon: ':shrug:'
-      emoji: '&e¯\\_(ツ)_/¯'
-    tableflip:
-      emoticon: ':tableflip:'
-      emoji: '&c(╯°□°）╯&r&f︵&r&7 ┻━┻'
-    wave:
-      emoticon: 'o/'
-      emoji: '&d( ﾟ◡ﾟ)/'
-    123:
-      emoticon: ':123:'
-      emoji: '&a1&r&e2&r&c3'
-    totem:
-      emoticon: ':totem:'
-      emoji: '&b☉&r&e_&r&b☉'
-    typing:
-      emoticon: ':typing:'
-      emoji: '&e✎&r&6...'
-    maths:
-      emoticon: ':maths:'
-      emoji: '&a√&r&e&l(&r&aπ&r&a&l+x&r&e&l)&r&a&l=&r&c&lL'
-    snail:
-      emoticon: ':snail:'
-      emoji: '&e@&r&a''&r&e-&r&a'''
-    thinking:
-      emoticon: ':thinking:'
-      emoji: '&6(&r&a0&r&6.&r&ao&r&c?&r&6)'
-    gimme:
-      emoticon: ':gimme:'
-      emoji: '&b༼つ◕_◕༽つ'
-    wizard:
-      emoticon: ':wizard:'
-      emoji: '&e(&r&b''&r&e-&r&b''&r&e)⊃&r&c━&r&d☆ﾟ.*･｡ﾟ'
-    pvp:
-      emoticon: ':pvp:'
-      emoji: '&e⚔'
-    peace:
-      emoticon: ':peace:'
-      emoji: '&a✌'
-    oof:
-      emoticon: ':oof:'
-      emoji: '&c&lOOF'
-    puffer:
-      emoticon: ':puffer:'
-      emoji: '&e&l<(''O'')>'
-  premium:
-    snow:
-      emoticon: ':snow:'
-      emoji: '&b☃'
-    yey:
-      emoticon: ':yey:'
-      emoji: '&aヽ (◕◡◕) ﾉ'
-    sloth:
-      emoticon: ':sloth:'
-      emoji: '&6(&r&8・&r&6⊝&r&8・&r&6)'
-    hey:
-      emoticon: 'h/'
-      emoji: '&eヽ(^◇^*)/'
-    cat:
-      emoticon: ':cat:'
-      emoji: '&e= &r&b＾● ⋏ ●＾&r&e ='
-    dab:
-      emoticon: ':dab:'
-      emoji: '&d<&r&eo&r&d/'
-    dog:
-      emoticon: ':dog:'
-      emoji: '&6(ᵔᴥᵔ)'
-    joy:
-      emoticon: [ '^_^', '^-^' ]
-      emoji: '&a$1'
-    dj:
-      emoticon: ':dj:'
-      emoji: '&9ヽ&r&5(&r&d⌐&r&c■&r&6_&r&e■&r&b)&r&3ノ&r&9♬'
-    cute:
-      emoticon: ':cute:'
-      emoji: '&e(&r&a✿&r&e◠‿◠)'
-facepalm:
-  emoticon: ':facepalm:'
-  emoji: '&6(&e－‸ლ&6)'
-skull:
-  emoticon: ':skull:'
-  emoji: '&7☠'
-uwu:
-  emoticon: 'UwU'
-  emoji: '&d$1'
-owo:
-  emoticon: 'OwO'
-  emoji: '&b$1'
-happy:
-  emoticon: ':)'
-  emoji: '☺'
-sad:
-  emoticon: ':('
-  emoji: '☹' 
-music:
-  emoticon: ':music:'
-  emoji: ['&c♫', '&9♬', '&3♪', '&5♩', '&a♭', '&e♪'] 
-playername:
-  emoticon: ':playername:'
-  emoji: '&9%player_name%'
+# I wouldn't recommend making changes in this config unless you're sure of what you're doing
+# for easier access to these settings, try using /emoji settings
+# The reason why I say this is because not all settings are visible in here unless you make changes
+# to them directly in the /emoji settings GUI (so redundant information is not stored)
+
+# Resource URL: https://www.spigotmc.org/resources/chatemojis.88027/
+# For bug/glitch reports, suggestions, or support please do so on my github repository
+# Github URL: https://github.com/Mxlvin/ChatEmojis
+
+lang: en_US
+
+settings:
+  use:
+    chat:
+      enabled: true
+    signs:
+      enabled: true
+    books:
+      enabled: true
