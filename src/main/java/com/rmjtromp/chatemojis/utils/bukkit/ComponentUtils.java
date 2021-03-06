@@ -1,4 +1,4 @@
-package com.rmjtromp.chatemojis.utils;
+package com.rmjtromp.chatemojis.utils.bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
