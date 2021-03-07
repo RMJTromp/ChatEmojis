@@ -21,14 +21,26 @@ Ungrouped emojis permission is as easy as `chatemojis.use.<name>`
 Grouped emojis permission needs to include the path to the group (ex. `chatemojis.use.<group-path>.<name>`)
 If you still don't understand how to get emoji-specific permission- as a server operator you're able to hover over the emoji (in the `/emoji` list) to view the permission node for that specific emoji.
 
-# Dependencies
-ChatEmojis does not hard-depend on any other plugins.
-**PlaceholderAPI** is a soft-dependency which means it's **NOT** required for ChatEmojis to work. If you'd like to use placeholders in your emojis, you're able to do so by also installing PlaceholderAPI.
+# Soft-Dependencies
+The plugins mentioned below are soft-dependencies, meaning that ChatEmojis does **NOT** require it for it to work.
 
+**[PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)** is used for parsing placeholders which you may have in your emojis.
 Please note that if you are using PlaceholderAPI, you must also install the PlaceholderAPI Extension corresponding to the placeholder you're trying to access, more about this can be found [here](https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders).
+
+**[EssentialsX](https://www.spigotmc.org/resources/essentialsx.9089/)** is used for parsing emoticons in direct messages.
 
 # How to create your own Emoji
 A full tutorial and detailed explanation on how to create your own emoji can be found [here](https://github.com/Mxlvin/ChatEmojis/wiki/How-to-create-your-own-emoji).
+
+# Supported Languages
+ChatEmojis currently only supports 1 language. If you're able to speak any other language fluently,
+and if you're able to translate from English, please create a pull request.
+
+All language files can be found [here](https://github.com/Mxlvin/ChatEmojis/tree/2.2.1/src/main/resources/lang).
+
+| Language | Country | Translator(s) | Code |
+| ------ | ------ | ------ | ------ |
+| English | US | [RMJTromp](https://github.com/Mxlvin) | en_US |
 
 # Emoji List (Screenshot)
 ![List of Emojis](https://i.imgur.com/B0s6wga.png)
