@@ -5,16 +5,25 @@ ChatEmojis allows you to add your own emojis in the config file and supports mul
 **Required Java Version:** Java 8+
 
 # Commands
-| Command | Aliases | Description | Permission |
-| ------ | ------ | ------ | ------ |
-| /emoji | /emojis | Shows list of emojis | chatemojis.command |
+***Note:** Sub-Commands varies per language, though the permission node **stays the same**.*
+
+| Command | Description | Permission |
+| ------  | ------ | ------ |
+| `/emoji help` | Shows list of commands | none |
+| `/emoji info` | Shows list of emojis | none |
+| `/emoji [list]` | Shows list of emojis | `chatemojis.list` |
+| `/emoji reload` | Reloads all emojis | `chatemojis.reload` |
+| `/emoji settings` | Shows list of emojis | `chatemojis.admin` |
+| `/emoji version` | Shows the plugin's version | none |
 
 # Permissions
 | Permission Node | Default | Description
 | ------ | ------ | ------ |
-| chatemojis.command | Everyone | Allowes access to use /emoji |
+| chatemojis.list | Everyone | Allows access to use /emoji [list] |
 | chatemojis.use.* | OP | Permission to use all emojis |
-| chatemojis.* | OP | Permission to use all emojis and /emoji command |
+| chatemojis.reload | OP | Allows access to reload emojis |
+| chatemojis.admin | OP | Allows access to change plugin settings |
+| chatemojis.* | OP | Permission to utilize everything |
 
 **Emoji-Specific Permission**:
 Ungrouped emojis permission is as easy as `chatemojis.use.<name>`
