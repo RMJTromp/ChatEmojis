@@ -89,7 +89,7 @@ class EmojiGroup implements AbstractEmoji {
                     	Replacements replacements = new Replacements();
                     	replacements.add("emoji", key);
                     	replacements.add("message", e.getMessage());
-                        System.out.println(String.format("[ChatEmoji] %s", Lang.translate("error.load.emoji", replacements)));
+                        System.out.println("[ChatEmoji] " + Lang.translate("error.load.emoji", replacements));
                     }
                 } else {
                     try {
@@ -98,7 +98,7 @@ class EmojiGroup implements AbstractEmoji {
                     	Replacements replacements = new Replacements();
                     	replacements.add("emojigroup", key);
                     	replacements.add("message", e.getMessage());
-                        System.out.println(String.format("[ChatEmoji] %s", Lang.translate("error.load.group", replacements)));
+                        System.out.println("[ChatEmoji] " + Lang.translate("error.load.group", replacements));
                     }
                 }
             }

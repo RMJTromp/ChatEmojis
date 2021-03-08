@@ -1,9 +1,6 @@
 package com.rmjtromp.chatemojis.gui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,7 +32,7 @@ import com.rmjtromp.chatemojis.utils.bukkit.Version;
  * containing items that represents all worlds that server contains.
  * @author Melvin
  * @since 2.2.1
- * @see {@link WorldSettingGUI}
+ * @see WorldSettingGUI
  */
 @SuppressWarnings("deprecation")
 public final class WorldSelectorGUI {
@@ -71,7 +68,7 @@ public final class WorldSelectorGUI {
 		replacements.add("chat-toggle", PLUGIN.getSettings().canUtilize(Service.CHAT, null) ? toggleYes : toggleNo);
 		replacements.add("book-toggle", PLUGIN.getSettings().canUtilize(Service.BOOKS, null) ? toggleYes : toggleNo);
 		replacements.add("sign-toggle", PLUGIN.getSettings().canUtilize(Service.SIGNS, null) ? toggleYes : toggleNo);
-		Arrays.asList(Lang.translate("gui.world-selector.global.description", replacements).split("\n")).stream().map(lore -> "&7"+lore).forEach(global::addLore);
+		Arrays.stream(Lang.translate("gui.world-selector.global.description", replacements).split("\n")).map(lore -> "&7"+lore).forEach(global::addLore);
 		
 		close = new ExtendedItemStack(BARRIER);
 		close.setDisplayName("&c"+Lang.translate("gui.general.close"));
@@ -93,7 +90,7 @@ public final class WorldSelectorGUI {
 	/**
 	 * Updates the description of the item assigned to a specific world;
 	 * use <code>null</code> for global.
-	 * @param world
+	 * @param world The world item which should be updated
 	 */
 	void updateItem(World world) {
 		if(world == null) {
@@ -111,7 +108,7 @@ public final class WorldSelectorGUI {
 				// and keeping the ItemStack so I can grab the slot of the item.
 				ItemStack ii = null;
 				for(ItemStack i : inventory.getContents()) {
-					if(i != null && item.equals(i)) {
+					if(item.equals(i)) {
 						ii = i;
 						break;
 					}
@@ -125,7 +122,7 @@ public final class WorldSelectorGUI {
 					replacements.add("sign-toggle", PLUGIN.getSettings().canUtilize(Service.SIGNS, world) ? toggleYes : toggleNo);
 					
 					item.removeLores();
-					Arrays.asList(Lang.translate("gui.world-selector.world.description", replacements).split("\n")).stream().map(lore -> "&7"+lore).forEach(item::addLore);
+					Arrays.stream(Lang.translate("gui.world-selector.world.description", replacements).split("\n")).map(lore -> "&7"+lore).forEach(item::addLore);
 					
 					inventory.setItem(slot, item);
 					items.replace(world, item);
@@ -138,7 +135,7 @@ public final class WorldSelectorGUI {
 	/**
 	 * Updates the items in all inventories
 	 */
-	private HashMap<World, ExtendedItemStack> items = new HashMap<>();
+	private final HashMap<World, ExtendedItemStack> items = new HashMap<>();
 	private void updateInventories() {
 		final List<World> worlds = Bukkit.getServer().getWorlds();
 		final int pages =  (worlds.size() + 1) / 36 + ((worlds.size() + 1) % 36 == 0 ? 0 : 1);
@@ -180,7 +177,7 @@ public final class WorldSelectorGUI {
 				replacements.add("chat-toggle", PLUGIN.getSettings().canUtilize(Service.CHAT, world) ? toggleYes : toggleNo);
 				replacements.add("book-toggle", PLUGIN.getSettings().canUtilize(Service.BOOKS, world) ? toggleYes : toggleNo);
 				replacements.add("sign-toggle", PLUGIN.getSettings().canUtilize(Service.SIGNS, world) ? toggleYes : toggleNo);
-				Arrays.asList(Lang.translate("gui.world-selector.world.description", replacements).split("\n")).stream().map(lore -> "&7"+lore).forEach(item::addLore);
+				Arrays.stream(Lang.translate("gui.world-selector.world.description", replacements).split("\n")).map(lore -> "&7"+lore).forEach(item::addLore);
 				
 				items.put(world, item);
 				
@@ -201,7 +198,7 @@ public final class WorldSelectorGUI {
 		worldSettingGUI.disable(deep);
 	}
 	
-	private Listener listener = new Listener() {
+	private final Listener listener = new Listener() {
 		
 		@EventHandler
 		public void onWorldLoad(WorldLoadEvent e) {
@@ -254,13 +251,13 @@ public final class WorldSelectorGUI {
 		    			else if(previous.equals(e.getCurrentItem())) e.getWhoClicked().openInventory(inventories.get(i-1));
 		    			else if(next.equals(e.getCurrentItem())) e.getWhoClicked().openInventory(inventories.get(i+1));
 		    			else if(global.equals(e.getCurrentItem())) {
-		    				if(e.getClick().isLeftClick()) e.getWhoClicked().openInventory(worldSettingGUI.get(null));
+		    				if(e.getClick().isLeftClick()) e.getWhoClicked().openInventory(Objects.requireNonNull(worldSettingGUI.get(null)));
 		    				else if(e.getClick().isRightClick()) {
 		    					for(Service service : Service.values()) {
 		    						if(!PLUGIN.getSettings().canUtilize(service, null)) PLUGIN.getSettings().toggleService(service, null);
 		    					}
 		    					updateItem(null);
-		    					((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.restored"));
+		    					e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.restored"));
 		    				}
 		    			} else if(!pane.equals(e.getCurrentItem())) {
 		    				if(e.getClick().isLeftClick() || e.getClick().isRightClick()) {
@@ -268,7 +265,7 @@ public final class WorldSelectorGUI {
 				    				if(e.getClick().isLeftClick()) {
 					    				Inventory inv = worldSettingGUI.get(entry.getKey().getUID());
 										if(inv != null) e.getWhoClicked().openInventory(inv);
-										else ((Player) e.getWhoClicked()).sendMessage(ChatColor.RED+Lang.translate("gui.world-selector.error.world-not-found"));
+										else e.getWhoClicked().sendMessage(ChatColor.RED+Lang.translate("gui.world-selector.error.world-not-found"));
 				    				} else {
 				    					for(Service service : Service.values()) {
 				    						if(PLUGIN.getSettings().canUtilize(service, entry.getKey()) != PLUGIN.getSettings().canUtilize(service, null)) {
@@ -276,7 +273,7 @@ public final class WorldSelectorGUI {
 				    						}
 				    					}
 				    					updateItem(entry.getKey());
-				    					((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.restored", Replacements.singleton("world", entry.getKey().getName())));
+				    					e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.restored", Replacements.singleton("world", entry.getKey().getName())));
 				    				}
 				    			});
 		    				}

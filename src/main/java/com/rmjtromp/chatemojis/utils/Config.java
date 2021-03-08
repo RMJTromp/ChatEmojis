@@ -49,35 +49,27 @@ public class Config extends YamlConfiguration {
 	public static Config init(File file, String resource) throws IOException, InvalidConfigurationException {
 		if(file == null) throw new IllegalArgumentException("File can not be null");
 		if(!file.exists()) {
-			Files.createParentDirs(file);
-			file.createNewFile();
-			
-			if(resource != null && !resource.isEmpty()) {
-				URL url = Config.class.getClassLoader().getResource(resource);
+			file.getParentFile().mkdirs();
 
-	            if (url == null) throw new NullPointerException("Resource doesn't exist? Resource URL is null.");
+			if(file.createNewFile()) {
+				if(resource != null && !resource.isEmpty()) {
+					URL url = Config.class.getClassLoader().getResource(resource);
 
-	            URLConnection connection = url.openConnection();
-	            connection.setUseCaches(false);
-	            
-				if(resource.toLowerCase().endsWith(".gz")) {
-					// decode and write to file
-		            try(BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-		            	InputStream in = connection.getInputStream()) {
-		                writer.write(GZIPUtils.read(in));
-		            }
-				} else {
-					// idk I copied this from spigot
-		            try(OutputStream out = new FileOutputStream(file);
-		            	InputStream in = connection.getInputStream()) {
-		                byte[] buf = new byte[1024];
-		                int len;
-		                while ((len = in.read(buf)) > 0) {
-		                    out.write(buf, 0, len);
-		                }
-		            }
-				}
-			} else throw new IllegalArgumentException("Resource can not be null or empty");
+					if (url == null) throw new NullPointerException("Resource doesn't exist? Resource URL is null.");
+
+					URLConnection connection = url.openConnection();
+					connection.setUseCaches(false);
+
+					try(OutputStream out = new FileOutputStream(file);
+						InputStream in = connection.getInputStream()) {
+						byte[] buf = new byte[1024];
+						int len;
+						while ((len = in.read(buf)) > 0) {
+							out.write(buf, 0, len);
+						}
+					}
+				} else throw new IllegalArgumentException("Resource can not be null or empty");
+			}
 		}
 		
 		return new Config(file);
@@ -141,8 +133,7 @@ public class Config extends YamlConfiguration {
 	 * @throws InvalidConfigurationException
 	 */
 	public void reload() throws IOException, InvalidConfigurationException {
-		if(!file.exists()) file.createNewFile();
-		load(file);
+		if(file.exists() || (!file.exists() && file.createNewFile())) load(file);
 	}
 	
 }

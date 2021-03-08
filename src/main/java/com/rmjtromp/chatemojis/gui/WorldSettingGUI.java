@@ -135,17 +135,17 @@ final class WorldSettingGUI {
 					final boolean chatState = PLUGIN.getSettings().canUtilize(Service.CHAT, world);
 					final ExtendedItemStack chat = new ExtendedItemStack(chatState ? LIME_DYE.clone() : GRAY_DYE.clone());
 					chat.setDisplayName("&6&l"+Lang.translate("gui.world-settings.chat.name"));
-					Arrays.asList(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", chatState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(chat::addLore);
+					Arrays.stream(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", chatState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(chat::addLore);
 					
 					final boolean signState = PLUGIN.getSettings().canUtilize(Service.SIGNS, world);
 					final ExtendedItemStack sign = new ExtendedItemStack(signState ? LIME_DYE.clone() : GRAY_DYE.clone());
 					sign.setDisplayName("&6&l"+Lang.translate("gui.world-settings.signs.name"));
-					Arrays.asList(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", signState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(sign::addLore);
+					Arrays.stream(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", signState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(sign::addLore);
 					
 					final boolean bookState = PLUGIN.getSettings().canUtilize(Service.BOOKS, world);
 					final ExtendedItemStack book = new ExtendedItemStack(bookState ? LIME_DYE.clone() : GRAY_DYE.clone());
 					book.setDisplayName("&6&l"+Lang.translate("gui.world-settings.books.name"));
-					Arrays.asList(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", bookState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(book::addLore);
+					Arrays.stream(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", bookState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(book::addLore);
 					
 					inventory.setItem(29, chat);
 					inventory.setItem(31, sign);
@@ -179,7 +179,7 @@ final class WorldSettingGUI {
 				replacements.add("chat-toggle", PLUGIN.getSettings().canUtilize(Service.CHAT, null) ? toggleYes : toggleNo);
 				replacements.add("book-toggle", PLUGIN.getSettings().canUtilize(Service.BOOKS, null) ? toggleYes : toggleNo);
 				replacements.add("sign-toggle", PLUGIN.getSettings().canUtilize(Service.SIGNS, null) ? toggleYes : toggleNo);
-				Arrays.asList(Lang.translate("gui.world-selector.global.description", replacements).split("\n")).stream().map(lore -> "&7"+lore).forEach(map::addLore);
+				Arrays.stream(Lang.translate("gui.world-selector.global.description", replacements).split("\n")).map(lore -> "&7"+lore).forEach(map::addLore);
 				
 				inventory.setItem(4, map);
 
@@ -189,17 +189,17 @@ final class WorldSettingGUI {
 				final boolean chatState = PLUGIN.getSettings().canUtilize(Service.CHAT, null);
 				final ExtendedItemStack chat = new ExtendedItemStack(chatState ? LIME_DYE.clone() : GRAY_DYE.clone());
 				chat.setDisplayName("&6&l"+Lang.translate("gui.world-settings.chat.name"));
-				Arrays.asList(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", chatState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(chat::addLore);
+				Arrays.stream(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", chatState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(chat::addLore);
 				
 				final boolean signState = PLUGIN.getSettings().canUtilize(Service.SIGNS, null);
 				final ExtendedItemStack sign = new ExtendedItemStack(signState ? LIME_DYE.clone() : GRAY_DYE.clone());
 				sign.setDisplayName("&6&l"+Lang.translate("gui.world-settings.signs.name"));
-				Arrays.asList(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", signState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(sign::addLore);
+				Arrays.stream(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", signState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(sign::addLore);
 				
 				final boolean bookState = PLUGIN.getSettings().canUtilize(Service.BOOKS, null);
 				final ExtendedItemStack book = new ExtendedItemStack(bookState ? LIME_DYE.clone() : GRAY_DYE.clone());
 				book.setDisplayName("&6&l"+Lang.translate("gui.world-settings.books.name"));
-				Arrays.asList(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", bookState ? enabled : disabled)).split("\n")).stream().map(lore -> "&7"+lore).forEach(book::addLore);
+				Arrays.stream(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", bookState ? enabled : disabled)).split("\n")).map(lore -> "&7"+lore).forEach(book::addLore);
 				
 				inventory.setItem(29, chat);
 				inventory.setItem(31, sign);
@@ -218,7 +218,7 @@ final class WorldSettingGUI {
 		if(deep) HandlerList.unregisterAll(listener);
 	}
 	
-	private Listener listener = new Listener() {
+	private final Listener listener = new Listener() {
 		
 		@EventHandler
 		public void onWorldUnload(WorldUnloadEvent e) {
@@ -290,11 +290,11 @@ final class WorldSettingGUI {
 								// update item
 								final ExtendedItemStack chat = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 								chat.setDisplayName("&6&l"+Lang.translate("gui.world-settings.chat.name"));
-								Arrays.asList(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(chat::addLore);
+								Arrays.stream(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(chat::addLore);
 								
 								inventory.setItem(e.getSlot(), chat);
 								
-								((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.chat."+(toggle ? "enabled" : "disabled")));
+								e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.chat."+(toggle ? "enabled" : "disabled")));
 								worldSelectorGUI.updateItem(null);
 	    					}
 	    				} else if(e.getSlot() == 31) {
@@ -305,11 +305,11 @@ final class WorldSettingGUI {
 								// update item
 								final ExtendedItemStack sign = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 								sign.setDisplayName("&6&l"+Lang.translate("gui.world-settings.signs.name"));
-								Arrays.asList(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(sign::addLore);
+								Arrays.stream(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(sign::addLore);
 								
 								inventory.setItem(e.getSlot(), sign);
 								
-								((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.signs."+(toggle ? "enabled" : "disabled")));
+								e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.signs."+(toggle ? "enabled" : "disabled")));
 								worldSelectorGUI.updateItem(null);
 	    					}
 	    				} else if(e.getSlot() == 33) {
@@ -320,11 +320,11 @@ final class WorldSettingGUI {
 								// update item
 								final ExtendedItemStack book = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 								book.setDisplayName("&6&l"+Lang.translate("gui.world-settings.books.name"));
-								Arrays.asList(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(book::addLore);
+								Arrays.stream(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(book::addLore);
 								
 								inventory.setItem(e.getSlot(), book);
 								
-								((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.books."+(toggle ? "enabled" : "disabled")));
+								e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.global.books."+(toggle ? "enabled" : "disabled")));
 								worldSelectorGUI.updateItem(null);
 	    					}
 	    				}
@@ -356,11 +356,11 @@ final class WorldSettingGUI {
 											// update item
 											final ExtendedItemStack chat = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 											chat.setDisplayName("&6&l"+Lang.translate("gui.world-settings.chat.name"));
-											Arrays.asList(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(chat::addLore);
+											Arrays.stream(Lang.translate("gui.world-settings.chat.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(chat::addLore);
 											
 											inventory.setItem(e.getSlot(), chat);
-											
-											((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.chat."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
+
+											e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.chat."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
 											worldSelectorGUI.updateItem(world);
 				    					}
 				    				} else if(e.getSlot() == 31) {
@@ -371,11 +371,11 @@ final class WorldSettingGUI {
 											// update item
 											final ExtendedItemStack sign = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 											sign.setDisplayName("&6&l"+Lang.translate("gui.world-settings.signs.name"));
-											Arrays.asList(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(sign::addLore);
+											Arrays.stream(Lang.translate("gui.world-settings.signs.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(sign::addLore);
 											
 											inventory.setItem(e.getSlot(), sign);
 											
-											((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.signs."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
+											e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.signs."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
 											worldSelectorGUI.updateItem(world);
 				    					}
 				    				} else if(e.getSlot() == 33) {
@@ -386,11 +386,11 @@ final class WorldSettingGUI {
 											// update item
 											final ExtendedItemStack book = new ExtendedItemStack(toggle ? LIME_DYE.clone() : GRAY_DYE.clone());
 											book.setDisplayName("&6&l"+Lang.translate("gui.world-settings.books.name"));
-											Arrays.asList(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).stream().map(lore -> "&7"+lore).forEach(book::addLore);
+											Arrays.stream(Lang.translate("gui.world-settings.books.description", Replacements.singleton("state", toggle ? "&a"+Lang.translate("gui.general.state-enabled") : "&c"+Lang.translate("gui.general.state-disabled"))).split("\n")).map(lore -> "&7"+lore).forEach(book::addLore);
 											
 											inventory.setItem(e.getSlot(), book);
 											
-											((Player) e.getWhoClicked()).sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.books."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
+											e.getWhoClicked().sendMessage(ChatColor.GRAY+Lang.translate("gui.world-settings.toggles.world.books."+(toggle ? "enabled" : "disabled"), Replacements.singleton("world", world.getName())));
 											worldSelectorGUI.updateItem(world);
 				    					}
 				    				}

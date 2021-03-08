@@ -93,8 +93,9 @@ final class EventHandler implements Listener {
 	@org.bukkit.event.EventHandler(priority = EventPriority.LOWEST)
     public void onSignChange(SignChangeEvent e) {
 		if(PLUGIN.getSettings().canUtilize(Service.SIGNS, e.getPlayer().getWorld())) {
-        	for(int i = 0; i < e.getLines().length; i++) {
-        		e.setLine(i, PLUGIN.getEmojis().parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i)));
+			String[] lines = e.getLines();
+        	for(int i = 0; i < lines.length; i++) {
+        		e.setLine(i, PLUGIN.getEmojis().parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(lines[i]), lines[i]));
         	}
     	}
     }

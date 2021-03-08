@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,9 +19,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
 import com.rmjtromp.chatemojis.utils.Config;
-import com.rmjtromp.chatemojis.utils.GZIPUtils;
 import com.rmjtromp.chatemojis.utils.Lang;
 import com.rmjtromp.chatemojis.utils.bukkit.Version;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * {@link ChatEmojis} main plugin class.
@@ -46,44 +48,10 @@ public final class ChatEmojis extends JavaPlugin {
     public ChatEmojis() throws IOException {
         plugin = this;
 
-//		getDataFolder().mkdirs();
-//		File content = new File(getDataFolder(), "content.txt");
-//		File compressed = new File(getDataFolder(), "compressed.txt.gz");
-//		File uncompressed = new File(getDataFolder(), "uncompressed.txt");
-//		try {
-//			if(!content.exists()) content.createNewFile();
-//			if(!compressed.exists()) compressed.createNewFile();
-//			if(!uncompressed.exists()) uncompressed.createNewFile();
-//			
-//			try(OutputStreamWriter writer =  new OutputStreamWriter(new FileOutputStream(content), StandardCharsets.UTF_8);
-//	            InputStream in = getResource("test.txt")) {
-//				String body = CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8));
-//	            writer.write(body);
-//	            
-//	            GZIPUtils.compressToFile(compressed, body);
-//	            
-//	            try(OutputStreamWriter writer2 =  new OutputStreamWriter(new FileOutputStream(uncompressed), StandardCharsets.UTF_8)) {
-//	            	writer2.write(GZIPUtils.decompress(compressed));
-//	            }
-//	        }
-//		} catch(IOException e) {
-//			e.printStackTrace();
-//		}
-
-//        List<String> resources = Arrays.asList("lang/en_US.yml", "emojis.yml", "config.yml");
-//        resources.forEach(resource -> {
-//    		try(InputStream in = getResource(resource)) {
-//    			GZIPUtils.compressToFile(new File(getDataFolder(), resource.replace("/", File.separator)+".gz"), in);
-//            } catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//        });
-
-        // load default language
-		try(InputStream in = getResource("lang/en_US.yml.gz")) {
-			String con = GZIPUtils.decompress(in);
-	    	Lang.load(new StringReader(con));
-	    	System.out.println(con);
+        // load base (also default) language
+		try(InputStream in = getResource("lang/en_US.yml")) {
+			assert in != null;
+			Lang.load(new StringReader(IOUtils.toString(in, StandardCharsets.UTF_8)));
 		}
     }
     
@@ -193,12 +161,10 @@ public final class ChatEmojis extends JavaPlugin {
 			e.printStackTrace();
 		} finally {
 	    	// reload layered language
-	        if(config.isString("lang")) {
-	        	String lang = config.getString("lang");
-	        	if(!lang.equals("en_US")) {
-	        		// TODO check for a language & load it if available
-	        	}
-	        }
+			String lang = config.getString("lang", "en_US");
+			if(!lang.equals("en_US")) {
+				// TODO check for a language & load it if available
+			}
 	        
 	        // reload emojis
 	    	reloadEmojis();
@@ -218,7 +184,7 @@ public final class ChatEmojis extends JavaPlugin {
      * @return {@link Config}
      */
     @Override
-    public Config getConfig() {
+    public @NotNull Config getConfig() {
 		return config;
 	}
 

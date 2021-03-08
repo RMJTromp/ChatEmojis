@@ -1,5 +1,8 @@
 package com.rmjtromp.chatemojis.utils.bukkit;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 
 /**
@@ -19,12 +22,14 @@ public enum Version {
 	V1_15,
 	V1_16,
 	V1_17;
-	
+
+	private static Version serverVersion = null;
+
 	/**
 	 * Returns the {@link Version} enumeration of the server version
-	 * @return {@link Version}
+	 * @return Version
 	 */
-	private static Version serverVersion = null;
+	@Nullable
 	public static Version getServerVersion() {
 		if(serverVersion != null) return serverVersion;
 		String v = BukkitUtils.getServerVersion().substring(1);
@@ -33,8 +38,6 @@ public enum Version {
 		}
 		return null;
 	}
-	
-	private Version() {}
 	
 	/**
 	 * Returns true is the version is older <u>than</u> 1.13
@@ -50,7 +53,7 @@ public enum Version {
 	 * @param version to compare to
 	 * @return Whether or not version is older
 	 */
-	public boolean isOlderThan(Version version) {
+	public boolean isOlderThan(@NotNull Version version) {
 		return Arrays.asList(Version.values()).indexOf(this) < Arrays.asList(Version.values()).indexOf(version);
 	}
 	
@@ -60,7 +63,7 @@ public enum Version {
 	 * @param version to compare to
 	 * @return Whether or not version is newer
 	 */
-	public boolean isNewerThan(Version version) {
+	public boolean isNewerThan(@NotNull Version version) {
 		return Arrays.asList(Version.values()).indexOf(this) > Arrays.asList(Version.values()).indexOf(version);
 	}
 	

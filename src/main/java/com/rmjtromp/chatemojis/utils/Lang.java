@@ -62,25 +62,30 @@ public final class Lang {
 		
 		if(layeredLanguage != null && (layeredLanguage.isString(key) || layeredLanguage.isList(key))) {
 			String string = layeredLanguage.isString(key) ? layeredLanguage.getString(key) : String.join("\n", layeredLanguage.getStringList(key));
-			
-			// parse placeholders
-			for(Entry<String, String> entry : replacements.entrySet()) {
-				Pattern pattern = Pattern.compile(Pattern.quote("${"+entry.getKey()+"}"), Pattern.CASE_INSENSITIVE);
-				Matcher matcher = pattern.matcher(string);
-				if(matcher.find()) string = matcher.replaceAll(entry.getValue());
+
+			if(string != null) {
+				// parse placeholders
+				for(Entry<String, String> entry : replacements.entrySet()) {
+					Pattern pattern = Pattern.compile(Pattern.quote("${"+entry.getKey()+"}"), Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(string);
+					if(matcher.find()) string = matcher.replaceAll(entry.getValue());
+				}
+				return string;
 			}
-			return string;
 		} else if(language != null && (language.isString(key) || language.isList(key))) {
 			String string = language.isString(key) ? language.getString(key) : String.join("\n", language.getStringList(key));
-			
-			// parse placeholders
-			for(Entry<String, String> entry : replacements.entrySet()) {
-				Pattern pattern = Pattern.compile(Pattern.quote("${"+entry.getKey()+"}"), Pattern.CASE_INSENSITIVE);
-				Matcher matcher = pattern.matcher(string);
-				if(matcher.find()) string = matcher.replaceAll(entry.getValue());
+
+			if(string != null) {
+				// parse placeholders
+				for(Entry<String, String> entry : replacements.entrySet()) {
+					Pattern pattern = Pattern.compile(Pattern.quote("${"+entry.getKey()+"}"), Pattern.CASE_INSENSITIVE);
+					Matcher matcher = pattern.matcher(string);
+					if(matcher.find()) string = matcher.replaceAll(entry.getValue());
+				}
+				return string;
 			}
-			return string;
-		} else throw new NullPointerException(String.format("Could not find key `%s` in language files.", key));
+		}
+		throw new NullPointerException(String.format("Could not find key `%s` in language files.", key));
 	}
 
 	/**

@@ -32,6 +32,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.jetbrains.annotations.NotNull;
 
 class Emoji implements AbstractEmoji {
 
@@ -46,7 +47,7 @@ class Emoji implements AbstractEmoji {
     private final List<String> emojis = new ArrayList<>();
     private boolean enabled = true;
 
-    static Emoji init(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
+    static Emoji init(@NotNull EmojiGroup parent, @NotNull ConfigurationSection section) throws ConfigException {
         return new Emoji(Objects.requireNonNull(parent), Objects.requireNonNull(section));
     }
 
@@ -57,9 +58,9 @@ class Emoji implements AbstractEmoji {
      * @param section
      * @throws ConfigException
      */
-    private Emoji(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
+    private Emoji(@NotNull EmojiGroup parent, @NotNull ConfigurationSection section) throws ConfigException {
         this.parent = parent;
-        Matcher matcher = NAME_PATTERN.matcher(section.getCurrentPath());
+        Matcher matcher = NAME_PATTERN.matcher(section.getCurrentPath() != null ? section.getCurrentPath() : "");
         if(matcher.find()) {
             name = matcher.group(1).replaceAll("[_\\s]", "-").replaceAll("[^0-9a-zA-Z-]", "");
             if(name.isEmpty()) throw new ConfigException(Lang.translate("error.emoji.name.empty"), section);
@@ -82,18 +83,21 @@ class Emoji implements AbstractEmoji {
             if(key.toLowerCase().matches("^emoticons?$")) {
                 if(section.isString(key) || section.isInt(key)) {
                     String emoticon = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
-                    if(!emoticon.isEmpty()) emoticons.add(emoticon);
+                    if(emoticon != null && !emoticon.isEmpty()) emoticons.add(emoticon);
                     else throw new InvalidEmoticonException(Lang.translate("error.emoji.emoticon.empty"), section);
                 } else if(section.isList(key)) {
-                    for(Object obj : section.getList(key)) {
-                        String emoticon;
-                        if(obj instanceof String) emoticon = (String) obj;
-                        else if(obj instanceof Integer) emoticon = Integer.toString((Integer) obj);
-                        else if(obj instanceof Boolean) emoticon = Boolean.toString((Boolean) obj);
-                        else throw new InvalidEmoticonException(Lang.translate("error.emoji.emoticon.not-supported"), section);
+                    List<?> list = section.getList(key);
+                    if(list != null) {
+                        for(Object obj : list) {
+                            String emoticon;
+                            if(obj instanceof String) emoticon = (String) obj;
+                            else if(obj instanceof Integer) emoticon = Integer.toString((Integer) obj);
+                            else if(obj instanceof Boolean) emoticon = Boolean.toString((Boolean) obj);
+                            else throw new InvalidEmoticonException(Lang.translate("error.emoji.emoticon.not-supported"), section);
 
-                        if(!emoticon.isEmpty()) emoticons.add(emoticon);
-                        else throw new InvalidEmoticonException(Lang.translate("error.emoji.emoticon.empty"), section);
+                            if(!emoticon.isEmpty()) emoticons.add(emoticon);
+                            else throw new InvalidEmoticonException(Lang.translate("error.emoji.emoticon.empty"), section);
+                        }
                     }
                 }
                 emoticonFound = true;
@@ -112,9 +116,11 @@ class Emoji implements AbstractEmoji {
             if(key.equalsIgnoreCase("regex")) {
                 if(section.isString(key)) {
                     String value = section.getString(key);
-                    Matcher m = REGEX_PATTERN.matcher(value);
-                    if(m.matches()) pattern = m.group(2) != null ? Pattern.compile(m.group(1), Pattern.CASE_INSENSITIVE) : Pattern.compile(m.group(1));
-                    else throw new InvalidRegexException(Lang.translate("error.emoji.regex.invalid"), section);
+                    if(value != null) {
+                        Matcher m = REGEX_PATTERN.matcher(value);
+                        if(m.matches()) pattern = m.group(2) != null ? Pattern.compile(m.group(1), Pattern.CASE_INSENSITIVE) : Pattern.compile(m.group(1));
+                        else throw new InvalidRegexException(Lang.translate("error.emoji.regex.invalid"), section);
+                    }
                 }
                 break;
             }
@@ -132,18 +138,21 @@ class Emoji implements AbstractEmoji {
             if(key.toLowerCase().matches("^emojis?$")) {
                 if(section.isString(key) || section.isInt(key)) {
                     String emoji = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
-                    if(!emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
+                    if(emoji != null && !emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
                     else throw new InvalidEmojiException(Lang.translate("error.emoji.emoji.empty"), section);
                 } else if(section.isList(key)) {
-                    for(Object obj : section.getList(key)) {
-                        String emoji;
-                        if(obj instanceof String) emoji = (String) obj;
-                        else if(obj instanceof Integer) emoji = Integer.toString((Integer) obj);
-                        else if(obj instanceof Boolean) emoji =  Boolean.toString((Boolean) obj);
-                        else throw new InvalidEmojiException(Lang.translate("error.emoji.emoji.not-supported"), section);
+                    List<?> list = section.getList(key);
+                    if(list != null) {
+                        for(Object obj : list) {
+                            String emoji;
+                            if(obj instanceof String) emoji = (String) obj;
+                            else if(obj instanceof Integer) emoji = Integer.toString((Integer) obj);
+                            else if(obj instanceof Boolean) emoji =  Boolean.toString((Boolean) obj);
+                            else throw new InvalidEmojiException(Lang.translate("error.emoji.emoji.not-supported"), section);
 
-                        if(!emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
-                        else throw new InvalidEmojiException(Lang.translate("error.emoji.emoji.empty"), section);
+                            if(!emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
+                            else throw new InvalidEmojiException(Lang.translate("error.emoji.emoji.empty"), section);
+                        }
                     }
                 }
                 emojiFound = true;
@@ -255,7 +264,7 @@ class Emoji implements AbstractEmoji {
      * @param resetColor
      * @param message
      */
-    String parse(Player player, String resetColor, String message) {
+    String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message) {
         if(isEnabled() && player.hasPermission(getPermission())) {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
@@ -274,7 +283,7 @@ class Emoji implements AbstractEmoji {
      * @param player
      */
 	@SuppressWarnings("deprecation")
-	List<TextComponent> getComponent(Player player) {
+	List<TextComponent> getComponent(@NotNull Player player) {
         List<TextComponent> components = new ArrayList<>();
         emoticons.forEach(emoticon -> {
             TextComponent comp = ComponentUtils.createComponent(String.format("&7  - &e%s &7- &f%s", emoticon, parse(player, ChatColor.RESET+"", emoticon)));

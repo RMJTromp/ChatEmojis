@@ -28,8 +28,8 @@ import net.md_5.bungee.api.ChatColor;
  * that opens other inventories upon interaction to manipulate {@link ChatEmojis}' plugins {@link Settings}
  * @author Melvin
  * @since 2.2.1
- * @see {@link Settings}
- * @see {@link WorldSelectorGUI}
+ * @see Settings
+ * @see WorldSelectorGUI
  */
 @SuppressWarnings("deprecation")
 public final class SettingsGUI {
@@ -53,11 +53,11 @@ public final class SettingsGUI {
 		
 		pluginSettings = new ExtendedItemStack(ENDER_CHEST);
 		pluginSettings.setDisplayName("&6&l"+Lang.translate("gui.settings.plugin.name"));
-		Arrays.asList(Lang.translate("gui.settings.plugin.description").split("\n")).stream().map(lore -> "&7"+lore).forEach(pluginSettings::addLore);
+		Arrays.stream(Lang.translate("gui.settings.plugin.description").split("\n")).map(lore -> "&7"+lore).forEach(pluginSettings::addLore);
 		
 		worldSettings = new ExtendedItemStack(CHEST);
 		worldSettings.setDisplayName("&6&l"+Lang.translate("gui.settings.world.name"));
-		Arrays.asList(Lang.translate("gui.settings.world.description").split("\n")).stream().map(lore -> "&7"+lore).forEach(worldSettings::addLore);
+		Arrays.stream(Lang.translate("gui.settings.world.description").split("\n")).map(lore -> "&7"+lore).forEach(worldSettings::addLore);
 		
 		close = new ExtendedItemStack(BARRIER);
 		close.setDisplayName("&c"+Lang.translate("gui.general.close"));
@@ -82,7 +82,7 @@ public final class SettingsGUI {
 		worldSelectorGUI.disable(deep);
 	}
 	
-	private Listener listener = new Listener() {
+	private final Listener listener = new Listener() {
 
 		@EventHandler
 	    public void onInventoryDrag(InventoryDragEvent e) {
