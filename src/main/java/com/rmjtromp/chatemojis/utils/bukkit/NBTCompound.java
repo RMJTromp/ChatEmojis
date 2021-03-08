@@ -22,8 +22,6 @@ public class NBTCompound {
 	
 	/**
 	 * Initializes all of the classes, methods, and constructors
-	 * @throws NoSuchMethodException
-	 * @throws ClassNotFoundException
 	 */
 	private static final void init() {
 		initialized = true;
@@ -73,14 +71,11 @@ public class NBTCompound {
 	
 	/**
 	 * Returns whether or not the item has a specific key in its NBTCompound
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Whether or not the compound has that tag
-	 * @throws NoSuchMethodException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public boolean hasTag(@NotNull String key) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+	public boolean hasTag(@NotNull String key) throws Exception {
 		Object compound = getNBTCompound(getCraftItemStack());
 		Method hasKeyMethod = compound.getClass().getMethod("hasKey", String.class);
 		return (boolean) hasKeyMethod.invoke(compound, key);
@@ -88,13 +83,11 @@ public class NBTCompound {
 	
 	/**
 	 * Sets a boolean value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setBoolean(@NotNull String key, @NotNull boolean value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setBoolean(@NotNull String key, boolean value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setBooleanMethod.invoke(compound, key, value);
@@ -105,13 +98,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets a boolean value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setDouble(@NotNull String key, @NotNull double value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setDouble(@NotNull String key, double value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setDoubleMethod.invoke(compound, key, value);
@@ -122,13 +113,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets a float value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setFloat(@NotNull String key, @NotNull float value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setFloat(@NotNull String key, float value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setFloatMethod.invoke(compound, key, value);
@@ -139,13 +128,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets an integer value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setInt(@NotNull String key, @NotNull int value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setInt(@NotNull String key, int value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setIntMethod.invoke(compound, key, value);
@@ -156,13 +143,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets a short value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setShort(@NotNull String key, @NotNull short value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setShort(@NotNull String key, short value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setShortMethod.invoke(compound, key, value);
@@ -173,13 +158,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets a string value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setString(@NotNull String key, @NotNull String value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setString(@NotNull String key, @NotNull String value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setStringMethod.invoke(compound, key, value);
@@ -190,13 +173,11 @@ public class NBTCompound {
 
 	/**
 	 * Sets a long value to the NBTCompound
-	 * @param key
-	 * @param value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be manipulated
+	 * @param value The value of the tag
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void setLong(@NotNull String key, @NotNull long value) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void setLong(@NotNull String key, long value) throws Exception {
 		Object craftItem = getCraftItemStack();
 		Object compound = getNBTCompound(craftItem);
 		setLongMethod.invoke(compound, key, value);
@@ -207,104 +188,99 @@ public class NBTCompound {
 	
 	/**
 	 * Returns the boolean value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Boolean Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public boolean getBoolean(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public boolean getBoolean(@NotNull String key) throws Exception {
 		return (boolean) getBooleanMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 	
 	/**
 	 * Returns the double value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Double Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public double getDouble(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public double getDouble(@NotNull String key) throws Exception {
 		return (double) getDoubleMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 	
 	/**
 	 * Returns the float value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Float Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public float getFloat(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public float getFloat(@NotNull String key) throws Exception {
 		return (float) getFloatMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 	
 	/**
 	 * Returns the int value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Integer Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public int getInt(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public int getInt(@NotNull String key) throws Exception {
 		return (int) getIntMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 
 	/**
 	 * Returns the short value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Short Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public short getShort(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public short getShort(@NotNull String key) throws Exception {
 		return (short) getShortMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 
 	/**
 	 * Returns the string value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return String Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public String getString(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public String getString(@NotNull String key) throws Exception {
 		return (String) getStringMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 
 	/**
 	 * Returns the long value for key
-	 * @param key
+	 * @param key The tag which should be sought
 	 * @return Long Value
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public long getLong(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public long getLong(@NotNull String key) throws Exception {
 		return (long) getLongMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
 	
 	/**
 	 * Removes a key from the NBTCompound
-	 * @param key
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InstantiationException
+	 * @param key The tag which should be sought
+	 * @throws Exception Throw if there are any reflection exception
 	 */
-	public void remove(@NotNull String key) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void remove(@NotNull String key) throws Exception {
 		removeMethod.invoke(getNBTCompound(getCraftItemStack()), key);
 	}
-	
-	private Object getCraftItemStack() throws IllegalAccessException, InvocationTargetException {
+
+	/**
+	 * Converts the Item to CraftItemStack
+	 * @return CraftItemStack object
+	 * @throws Exception Throw if there are any reflection exception
+	 */
+	private Object getCraftItemStack() throws Exception {
 		return asNMSCopyMethod.invoke(craftItemStackClass, item);
 	}
 
-	private Object getNBTCompound(@NotNull Object craftItemStack) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	/**
+	 * Gets the NBTCompound of the CraftItemStack
+	 * @param craftItemStack The CraftItemStack whose NBTCompound is being utilized
+	 * @return NBTCompound
+	 * @throws Exception Throw if there are any reflection exception
+	 */
+	private Object getNBTCompound(@NotNull Object craftItemStack) throws Exception {
 		return (boolean) hasTagMethod.invoke(craftItemStack) ? getTagMethod.invoke(craftItemStack) : NBTTagCompoundConstructor.newInstance();
 	}
 	

@@ -17,8 +17,8 @@ public final class ComponentUtils {
     /**
      * Creates a text component from string
      * Supports chatcolors
-     * @param arg0
-     * @return
+     * @param arg0 The string which should be converted to a text component
+     * @return TextComponent
      */
     public static TextComponent createComponent(String arg0) {
         return new TextComponent(createBaseComponent(arg0));
@@ -27,8 +27,8 @@ public final class ComponentUtils {
     /**
      * Creates multiple components from strings
      * Supports chatcolor
-     * @param arg0
-     * @return
+     * @param arg0 The strings which should be converted into text components
+     * @return TextComponents
      */
     public static TextComponent[] createComponents(String ...arg0) {
         TextComponent[] components = new TextComponent[arg0.length];
@@ -39,8 +39,8 @@ public final class ComponentUtils {
     /**
      * Creates multiple components from strings
      * Supports chatcolor
-     * @param arg0
-     * @return
+     * @param arg0 The strings which should be converted into text components
+     * @return TextComponents
      */
     public static TextComponent[] createComponents(Iterable<String> arg0) {
         List<String> c = new ArrayList<>();
@@ -50,8 +50,8 @@ public final class ComponentUtils {
 
     /**
      * Appends components to eachother
-     * @param arg0
-     * @return
+     * @param arg0 The TextComponents which should be merged
+     * @return merged TextComponent
      */
     public static TextComponent mergeComponents(TextComponent ...arg0) {
         TextComponent component = new TextComponent();
@@ -60,9 +60,9 @@ public final class ComponentUtils {
     }
 
     /**
-     * Appends components to eachother
-     * @param arg0
-     * @return
+     * Appends components to each other
+     * @param arg0 The TextComponents which should be merged
+     * @return merged TextComponent
      */
     public static TextComponent mergeComponents(Iterable<TextComponent> arg0) {
         List<TextComponent> c = new ArrayList<>();
@@ -73,8 +73,8 @@ public final class ComponentUtils {
     /**
      * Creates basecomponents from string
      * supports chatcolor
-     * @param arg0
-     * @return
+     * @param arg0 Converts string to BaseComponenets
+     * @return BaseComponents
      */
     public static BaseComponent[] createBaseComponent(String arg0) {
         return TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', arg0));
@@ -82,9 +82,9 @@ public final class ComponentUtils {
 
     /**
      * Glues textcomponents together
-     * @param arg0
-     * @param arg1
-     * @return
+     * @param arg0 The component separator
+     * @param arg1 The TextComponent which should be joined
+     * @return Joined TextComponents
      */
     public static TextComponent joinComponents(String arg0, TextComponent ...arg1) {
         TextComponent component = new TextComponent();
@@ -98,9 +98,9 @@ public final class ComponentUtils {
 
     /**
      * Glues textcomponents together
-     * @param arg0
-     * @param arg1
-     * @return
+     * @param arg0 The component separator
+     * @param arg1 The TextComponent which should be joined
+     * @return Joined TextComponents
      */
     public static TextComponent joinComponents(String arg0, Iterable<TextComponent> arg1) {
         List<TextComponent> c = new ArrayList<>();

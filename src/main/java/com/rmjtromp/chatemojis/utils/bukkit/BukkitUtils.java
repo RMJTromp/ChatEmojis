@@ -34,7 +34,7 @@ public final class BukkitUtils {
 	
 	/**
 	 * Color encode a string
-	 * @param string
+	 * @param string The string which should be color-encoded
 	 * @return Color encoded string
 	 */
 	public static String colorEncode(String string) {
@@ -43,7 +43,7 @@ public final class BukkitUtils {
 	
 	/**
 	 * Color encode a collection of string
-	 * @param collection
+	 * @param collection The string collection which should be color-encoded
 	 * @return Color encoded string list
 	 */
 	public static List<String> colorEncode(Collection<String> collection) {
@@ -52,16 +52,16 @@ public final class BukkitUtils {
 	
 	/**
 	 * Color encode a collection of string
-	 * @param iterable
+	 * @param iterable The iterable which should be color-encoded
 	 * @return Color encoded string list
 	 */
-	public static List<String> colorEncode(Iterable<String> strings) {
-		return colorEncode(Arrays.asList(Iterables.toArray(strings, String.class)));
+	public static List<String> colorEncode(Iterable<String> iterable) {
+		return colorEncode(Arrays.asList(Iterables.toArray(iterable, String.class)));
 	}
 	
 	/**
 	 * Color encode an array of string
-	 * @param collection
+	 * @param strings The strings which should be color-encoded
 	 * @return Color encoded string list
 	 */
 	public static List<String> colorEncode(String...strings) {
@@ -72,7 +72,7 @@ public final class BukkitUtils {
 	 * Send a {@link BaseComponent} message to a player
 	 * @param player Receiver
 	 * @param message BaseComponent message
-	 * @throws Exception
+	 * @throws Exception Thrown if there any reflection exceptions
 	 */
 	public static void sendComponent(Player player, BaseComponent message) throws Exception {
 		Class<?> chatSerializerClass = BukkitUtils.getClass("net.minecraft.server.%s.ChatSerializer");
@@ -99,9 +99,9 @@ public final class BukkitUtils {
 	/**
 	 * Returns the version-specific class
 	 * This will replace '%s' with the server's version
-	 * @param string
+	 * @param string The class which should be sought
 	 * @return The class
-	 * @throws ClassNotFoundException
+	 * @throws ClassNotFoundException Thrown if class could not be found
 	 */
 	public static Class<?> getClass(@NotNull String string) throws ClassNotFoundException {
 		return Class.forName(String.format(string, BukkitUtils.getServerVersion()));

@@ -1,9 +1,7 @@
 package com.rmjtromp.chatemojis.utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,22 +14,19 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import com.google.common.io.Files;
-
 /**
  * Custom configuration files manager class.
  * @author Melvin
  * @since 2.2.1
- * @see {@link YAMLConfiguration}
+ * @see YamlConfiguration
  */
 public class Config extends YamlConfiguration {
 
 	/**
 	 * Creates a new config file or uses existing one
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 * @throws InvalidConfigurationException
+	 * @param file The file which the config should load
+	 * @throws IOException Thrown if an I/O exception occurs
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
 	 */
 	public static Config init(File file) throws IOException, InvalidConfigurationException {
 		if(!file.exists()) file.createNewFile();
@@ -40,11 +35,10 @@ public class Config extends YamlConfiguration {
 
 	/**
 	 * Creates a new config file and uses default input from resource if file doesn't exist
-	 * @param file
-	 * @param resource
-	 * @return
-	 * @throws IOException
-	 * @throws InvalidConfigurationException
+	 * @param file The file which the config should load
+	 * @param resource The resource which should be used as default if file doesn't exist
+	 * @throws IOException Thrown if an I/O exception occurs
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
 	 */
 	public static Config init(File file, String resource) throws IOException, InvalidConfigurationException {
 		if(file == null) throw new IllegalArgumentException("File can not be null");
@@ -129,8 +123,8 @@ public class Config extends YamlConfiguration {
 	
 	/**
 	 * Reloads the config file
-	 * @throws IOException
-	 * @throws InvalidConfigurationException
+	 * @throws IOException Thrown if an I/O exception occurs
+	 * @throws InvalidConfigurationException Thrown when the given file is not a valid Configuration.
 	 */
 	public void reload() throws IOException, InvalidConfigurationException {
 		if(file.exists() || (!file.exists() && file.createNewFile())) load(file);

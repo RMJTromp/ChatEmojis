@@ -117,8 +117,8 @@ public final class ChatEmojis extends JavaPlugin {
 	}
     
 	/**
-	 * Returns {@link ChatEmoji} settings instance. The settings contains everything that is toggle-able.
-	 * @return the {@link ChatEmoji} plugin's {@link Settings}
+	 * Returns {@link ChatEmojis} settings instance. The settings contains everything that is toggle-able.
+	 * @return the {@link ChatEmojis} plugin's {@link Settings}
 	 */
     public Settings getSettings() {
     	return settings;
@@ -179,8 +179,8 @@ public final class ChatEmojis extends JavaPlugin {
     }
     
     /**
-     * Returns the {@link Config} instance of {@link ChatEmoji}'s <code>config.yml</code>
-     * @see {@link YamlConfiguration}
+     * Returns the {@link Config} instance of {@link ChatEmojis}'s <code>config.yml</code>
+     * @see YamlConfiguration
      * @return {@link Config}
      */
     @Override
@@ -189,7 +189,7 @@ public final class ChatEmojis extends JavaPlugin {
 	}
 
     /**
-     * @return {@link ChatEmoji} Instance
+     * @return {@link ChatEmojis} Instance
      */
     public static ChatEmojis getInstance() {
         return plugin;
@@ -200,22 +200,22 @@ public final class ChatEmojis extends JavaPlugin {
      * and is used in {@link EmojiGroup} to iterate over all child instances
      * @since 2.2.1
      * @author Melvin
-     * @see {@link Emoji}
-     * @see {@link EmojiGroup}
+	 * @see Emoji
+	 * @see EmojiGroup
      */
     interface AbstractEmoji {
 
     	/**
     	 * @return the name of the {@link AbstractEmoji}
-    	 * @see {@link Emoji}
-    	 * @see {@link EmojiGroup}
+    	 * @see Emoji
+    	 * @see EmojiGroup
     	 */
     	String getName();
     	
     	/**
     	 * @return The required {@link Permission} node required to use this {@link AbstractEmoji}
-    	 * @see {@link Emoji}
-    	 * @see {@link EmojiGroup}
+    	 * @see Emoji
+    	 * @see EmojiGroup
     	 */
     	Permission getPermission();
     	

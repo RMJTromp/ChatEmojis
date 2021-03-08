@@ -14,37 +14,37 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import com.rmjtromp.chatemojis.utils.NumberUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class ExtendedItemStack extends ItemStack {
 
-	public ExtendedItemStack(ItemStack itemStack) {
-		super(itemStack == null ? new ItemStack(Material.AIR, 1) : itemStack);
+	public ExtendedItemStack(@NotNull ItemStack itemStack) {
+		super(itemStack);
 	}
 	
-	public ExtendedItemStack(Material material) {
+	public ExtendedItemStack(@NotNull Material material) {
 		super(material);
 	}
 	
-	public ExtendedItemStack(Material material, int amount) {
+	public ExtendedItemStack(@NotNull Material material, int amount) {
 		super(material);
 		setAmount(NumberUtils.constraintToRange(amount, 1, getMaxStackSize()));
 	}
 	
-	public ExtendedItemStack(String material) {
+	public ExtendedItemStack(@NotNull String material) {
 		this(material, 1);
 	}
 	
-	public ExtendedItemStack(String material, int amount) {
+	public ExtendedItemStack(@NotNull String material, int amount) {
 		super(Material.getMaterial(material));
 		setAmount(NumberUtils.constraintToRange(amount, 1, getMaxStackSize()));
 	}
 	
 	/**
 	 * Sets the displayname of the item
-	 * @param name
-	 * @return
+	 * @param name The new display name
 	 */
-	public ExtendedItemStack setDisplayName(String name) {
+	public ExtendedItemStack setDisplayName(@NotNull String name) {
 		ItemMeta meta = this.getItemMeta();
 		meta.setDisplayName(BukkitUtils.colorEncode(name));
 		this.setItemMeta(meta);
@@ -53,7 +53,7 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Returns the display name of the item
-	 * @return
+	 * @return The item's display name
 	 */
 	public String getDisplayName() {
 		return this.getItemMeta().getDisplayName();
@@ -61,10 +61,9 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Sets the lore of the item, replaces existing one
-	 * @param lores
-	 * @return
+	 * @param lores The lores which should be set
 	 */
-	public ExtendedItemStack setLore(Iterable<String> lores) {
+	public ExtendedItemStack setLore(@NotNull Iterable<String> lores) {
 		ItemMeta meta = this.getItemMeta();
 		meta.setLore(BukkitUtils.colorEncode(lores));
 		this.setItemMeta(meta);
@@ -73,10 +72,9 @@ public class ExtendedItemStack extends ItemStack {
 
 	/**
 	 * Prepend a lore to the bottom of the existing lore
-	 * @param lore
-	 * @return
+	 * @param lore The lore which should be prepended
 	 */
-	public ExtendedItemStack prependLore(String lore) {
+	public ExtendedItemStack prependLore(@NotNull String lore) {
 		List<String> lores = new ArrayList<>();
 		lores.add(BukkitUtils.colorEncode(lore));
 		lores.addAll(getLores());
@@ -86,10 +84,9 @@ public class ExtendedItemStack extends ItemStack {
 
 	/**
 	 * Append a lore to the bottom of the existing lore
-	 * @param lore
-	 * @return
+	 * @param lore The lore which should be appended
 	 */
-	public ExtendedItemStack appendLore(String lore) {
+	public ExtendedItemStack appendLore(@NotNull String lore) {
 		List<String> lores = new ArrayList<>(getLores());
 		lores.add(BukkitUtils.colorEncode(lore));
 		setLore(lores);
@@ -98,20 +95,19 @@ public class ExtendedItemStack extends ItemStack {
 
 	/**
 	 * Append a lore to the bottom of the existing lore
-	 * @param lore
-	 * @return
+	 * @param lore The lore which should be added
+	 * @see ExtendedItemStack#appendLore(String)
 	 */
-	public ExtendedItemStack addLore(String ...lore) {
+	public ExtendedItemStack addLore(@NotNull String ...lore) {
 		for(String l : lore) appendLore(l);
 		return this;
 	}
 
 	/**
 	 * Prepend multiple lores to the bottom of the existing lore
-	 * @param lores
-	 * @return
+	 * @param lores The lores which should be prepended
 	 */
-	public ExtendedItemStack prependLores(Iterable<String> lores) {
+	public ExtendedItemStack prependLores(@NotNull Iterable<String> lores) {
 		List<String> newLores = new ArrayList<>();
 		newLores.addAll(BukkitUtils.colorEncode(lores));
 		newLores.addAll(getLores());
@@ -121,10 +117,9 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Append multiple lores to the bottom of the existing lore
-	 * @param lores
-	 * @return
+	 * @param lores The lores which should be prepended
 	 */
-	public ExtendedItemStack appendLores(Iterable<String> lores) {
+	public ExtendedItemStack appendLores(@NotNull Iterable<String> lores) {
 		List<String> newLores = new ArrayList<>();
 		newLores.addAll(getLores());
 		newLores.addAll(BukkitUtils.colorEncode(lores));
@@ -134,7 +129,7 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Returns the lores or the item
-	 * @return
+	 * @return The item's lores
 	 */
 	public List<String> getLores() {
 		List<String> lores = new ArrayList<>();
@@ -144,7 +139,6 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Removes the current item lores
-	 * @return
 	 */
 	public ExtendedItemStack removeLores() {
 		setLore(new ArrayList<>());
@@ -152,8 +146,8 @@ public class ExtendedItemStack extends ItemStack {
 	}
 	
 	/**
-	 * Returns whether or not the item has a lore
-	 * @return
+	 * Checks and returns if the item has a lore
+	 * @return Whether or not the item has a lore
 	 */
 	public boolean hasLore() {
 		ItemMeta meta = this.getItemMeta();
@@ -162,10 +156,9 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Adds ItemFlags to the item
-	 * @param arg0
-	 * @return
+	 * @param arg0 The ItemFlags which should be added
 	 */
-	public ExtendedItemStack addItemFlags(ItemFlag ...arg0) {
+	public ExtendedItemStack addItemFlags(@NotNull ItemFlag ...arg0) {
 		ItemMeta meta = this.getItemMeta();
 		meta.addItemFlags(arg0);
 		this.setItemMeta(meta);
@@ -174,10 +167,9 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Removes ItemFlags from the item
-	 * @param arg0
-	 * @return
+	 * @param arg0 The ItemFlags which should be removed
 	 */
-	public ExtendedItemStack removeItemFlags(ItemFlag ...arg0) {
+	public ExtendedItemStack removeItemFlags(@NotNull ItemFlag ...arg0) {
 		ItemMeta meta = this.getItemMeta();
 		meta.removeItemFlags(arg0);
 		this.setItemMeta(meta);
@@ -186,7 +178,7 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Returns all ItemFlags applied to item
-	 * @return
+	 * @return ItemFlags which are present on the item
 	 */
 	public Set<ItemFlag> getItemFlags() {
 		ItemMeta meta = this.getItemMeta();
@@ -195,18 +187,17 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Returns whether or not a specific ItemFlag is present
-	 * @param flag
-	 * @return
+	 * @param flag Which ItemFlag should be sought for
+	 * @return boolean whether or not a ItemFlag is present
 	 */
-	public boolean hasItemFlag(ItemFlag flag) {
+	public boolean hasItemFlag(@NotNull ItemFlag flag) {
 		ItemMeta meta = this.getItemMeta();
 		return meta.hasItemFlag(flag);
 	}
 	
 	/**
 	 * Adds/removes glowing effect to the item, though it hides all enchantents
-	 * @param glow
-	 * @return
+	 * @param glow Toggle whether or not the glow effect should be on or off
 	 */
 	public ExtendedItemStack setGlow(boolean glow) {
 		ItemMeta meta = this.getItemMeta();
@@ -223,9 +214,9 @@ public class ExtendedItemStack extends ItemStack {
 
 	/**
 	 * Set the color of leather armors
-	 * @param arg0
+	 * @param arg0 The color which the leather armor should be
 	 */
-	public ExtendedItemStack setColor(Color arg0) {
+	public ExtendedItemStack setColor(@NotNull Color arg0) {
 		if(getItemMeta() instanceof LeatherArmorMeta) {
 			LeatherArmorMeta meta = (LeatherArmorMeta) getItemMeta();
 			meta.setColor(arg0);
@@ -236,7 +227,7 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Returns whether or not the item has glowing effect to it
-	 * @return
+	 * @return whether or not the item has glowing effect
 	 */
 	public boolean hasGlow() {
 		ItemMeta meta = this.getItemMeta();
@@ -250,7 +241,7 @@ public class ExtendedItemStack extends ItemStack {
 	 * <br><br>
 	 * <code>ItemStack#setItemMeta(NBTComponent#getItemMeta())</code>
 	 * 
-	 * @return
+	 * @return NBTCompound of the item
 	 */
 	public NBTCompound getNBTCompound() {
 		return new NBTCompound(this);
@@ -258,14 +249,10 @@ public class ExtendedItemStack extends ItemStack {
 	
 	/**
 	 * Makes the item unbreakable
-	 * @param unbreakable
-	 * @return
-	 * @throws InstantiationException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
-	 * @throws NoSuchMethodException 
+	 * @param unbreakable Whether or not the item should be unbreakable
+	 * @throws Exception Thrown if there are any reflection exceptions
 	 */
-	public ExtendedItemStack setUnbreakable(boolean unbreakable) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+	public ExtendedItemStack setUnbreakable(boolean unbreakable) throws Exception {
 		getNBTCompound().setBoolean("Unbreakable", unbreakable);
 		return this;
 	}

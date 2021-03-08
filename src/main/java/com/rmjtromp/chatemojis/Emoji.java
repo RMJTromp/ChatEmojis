@@ -54,9 +54,9 @@ class Emoji implements AbstractEmoji {
     /**
      * Creates an emoji from the {@link ConfigurationSection} provided,
      * and links the {@link Permission} node to the specified {@link EmojiGroup}
-     * @param parent
-     * @param section
-     * @throws ConfigException
+     * @param parent The parent group of the Emoji
+     * @param section The {@link ConfigurationSection} where the emoji's information lies
+     * @throws ConfigException If a configuration mistake is present, a configuration exception is thrown
      */
     private Emoji(@NotNull EmojiGroup parent, @NotNull ConfigurationSection section) throws ConfigException {
         this.parent = parent;
@@ -260,9 +260,9 @@ class Emoji implements AbstractEmoji {
     /**
      * Parses a string
      * replaces all emoticons with emojis
-     * @param player
-     * @param resetColor
-     * @param message
+     * @param player The player which its being parsed for
+     * @param resetColor The default color it should go to after the emoji is inserted
+     * @param message The message which should be parsed
      */
     String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message) {
         if(isEnabled() && player.hasPermission(getPermission())) {
@@ -280,7 +280,7 @@ class Emoji implements AbstractEmoji {
     /**
      * Returns {@link TextComponent} array to display in
      * list for each emoticons.
-     * @param player
+     * @param player The player which the emoticon should be parsed for
      */
 	@SuppressWarnings("deprecation")
 	List<TextComponent> getComponent(@NotNull Player player) {

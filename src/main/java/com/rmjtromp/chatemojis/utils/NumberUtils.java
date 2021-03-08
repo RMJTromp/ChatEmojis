@@ -14,9 +14,9 @@ public final class NumberUtils {
 	 * Returns value constrained by minimum and maximum value.<br>
 	 * If value is less than minimum value, the minimum value will be returned<br>
 	 * and vice-versa, otherwise the input value will be returned instead.
-	 * @param value
-	 * @param min
-	 * @param max
+	 * @param value The input value
+	 * @param min The minimum value
+	 * @param max The maximum value
 	 * @return Constrained number
 	 */
 	public static int constraintToRange(int value, int min, int max) {
@@ -27,8 +27,8 @@ public final class NumberUtils {
 	
 	/**
 	 * Returns the difference between two numbers
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Difference
 	 */
 	public static int getDistance(int arg0, int arg1) {
@@ -38,8 +38,8 @@ public final class NumberUtils {
 	
 	/**
 	 * Returns the highest number
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Highest value
 	 */
 	public static int getHighestValue(int arg0, int arg1) {
@@ -48,8 +48,8 @@ public final class NumberUtils {
 	
 	/**
 	 * Returns the lowest number
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Lowest value
 	 */
 	public static int getLowestValue(int arg0, int arg1) {
@@ -58,8 +58,8 @@ public final class NumberUtils {
 
 	/**
 	 * Returns the difference between two numbers
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Difference
 	 */
 	public static double getDistance(double arg0, double arg1) {
@@ -69,8 +69,8 @@ public final class NumberUtils {
 
 	/**
 	 * Returns the highest number
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Highest value
 	 */
 	public static double getHighestValue(double arg0, double arg1) {
@@ -79,8 +79,8 @@ public final class NumberUtils {
 
 	/**
 	 * Returns the lowest number
-	 * @param arg0
-	 * @param arg1
+	 * @param arg0 The first number
+	 * @param arg1 The second number
 	 * @return Lowest value
 	 */
 	public static double getLowestValue(double arg0, double arg1) {
@@ -89,7 +89,7 @@ public final class NumberUtils {
 
 	/**
 	 * Rounds to nearest half
-	 * @param d
+	 * @param d The number which should be rounded
 	 * @return Number rounded to .5
 	 */
 	static double roundToHalf(double d) {
@@ -98,7 +98,7 @@ public final class NumberUtils {
 
 	/**
 	 * Rounds to nearest 45
-	 * @param f
+	 * @param f The number which should be rounded
 	 * @return Number rounded to nearest number divisible by 45
 	 */
 	static float roundToNearest45Deg(float f) {
@@ -107,8 +107,8 @@ public final class NumberUtils {
 
 	/**
 	 * Generated a random number
-	 * @param min
-	 * @param max
+	 * @param min The minimum value
+	 * @param max The maximum value
 	 * @return random number
 	 */
 	public static int generateRandomNumber(int min, int max) {

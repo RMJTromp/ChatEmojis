@@ -2,6 +2,7 @@ package com.rmjtromp.chatemojis.utils;
 
 import java.io.File;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,32 +28,44 @@ public final class Lang {
 	
 	/**
 	 * Loads a language file to Lang instance
-	 * @param file
+	 * @param file The file which it should load language from
 	 */
 	public static void load(File file) {
 		language = YamlConfiguration.loadConfiguration(file);
 		layeredLanguage = null;
 	}
-	
+
+	/**
+	 * Loads a language from a string reader instance
+	 * @param reader The reader which it should load language from
+	 */
 	public static void load(Reader reader) {
 		language = YamlConfiguration.loadConfiguration(reader);
 		layeredLanguage = null;
 	}
-	
+
 	/**
 	 * Layers a language file on top of loaded language instance
-	 * @param file
+	 * @param file The language file which should be layered
 	 */
 	public static void layer(File file) {
 		layeredLanguage = YamlConfiguration.loadConfiguration(file);
+	}
+
+	/**
+	 * Layers a StringReader on top of loaded language instance
+	 * @param reader The StringReader which should be layered
+	 */
+	public static void layer(StringReader reader) {
+		layeredLanguage = YamlConfiguration.loadConfiguration(reader);
 	}
 	
 	/**
 	 * Returns the value for the layered language first
 	 * if no value is found, it returns the default
 	 * if no value is found, it throw a {@link NullPointerException}
-	 * @param key
-	 * @param replacements
+	 * @param key The key which should be sought for
+	 * @param replacements The placeholder replacements
 	 * @return Translated version of the expected value
 	 */
 	public static String translate(@NotNull String key, @NotNull Replacements replacements) {
@@ -92,7 +105,7 @@ public final class Lang {
 	 * Returns the value for the layered language first
 	 * if no value is found, it returns the default
 	 * if no value is found, it throw a {@link NullPointerException}
-	 * @param key
+	 * @param key The key which should be sought for
 	 * @return Translated version of the expected value
 	 */
 	public static String translate(@NotNull String key) {

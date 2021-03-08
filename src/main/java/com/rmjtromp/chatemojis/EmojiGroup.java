@@ -21,6 +21,7 @@ import com.rmjtromp.chatemojis.utils.Lang;
 import com.rmjtromp.chatemojis.utils.Lang.Replacements;
 
 import net.md_5.bungee.api.chat.TextComponent;
+import org.jetbrains.annotations.NotNull;
 
 class EmojiGroup implements AbstractEmoji {
 	
@@ -33,22 +34,22 @@ class EmojiGroup implements AbstractEmoji {
 
     final List<String> parentNames = new ArrayList<>();
 
-    static EmojiGroup init(ConfigurationSection section) throws ConfigException {
+    static EmojiGroup init(@NotNull ConfigurationSection section) throws ConfigException {
         return new EmojiGroup(null, Objects.requireNonNull(section));
     }
 
     /**
      * Creates an {@link EmojiGroup} from the {@link ConfigurationSection} provided
-     * @param parent
-     * @param section
-     * @throws ConfigException
+     * @param parent The parent group of the EmojiGroup
+     * @param section The {@link ConfigurationSection} where the EmojiGroup's information lies
+     * @throws ConfigException If a configuration mistake is present, a configuration exception is thrown
      */
-    private EmojiGroup(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
+    private EmojiGroup(EmojiGroup parent, @NotNull ConfigurationSection section) throws ConfigException {
         this.parent = parent;
         String permissionBase = "chatemojis.use";
         if(parent != null) {
         	// scrape name from the ConfigurationSection path
-            Matcher matcher = NAME_PATTERN.matcher(section.getCurrentPath());
+            Matcher matcher = NAME_PATTERN.matcher(section.getCurrentPath() != null ? section.getCurrentPath() : "");
             if(matcher.find()) {
                 name = matcher.group(1).replaceAll("[_\\s]+", "-").replaceAll("[^0-9a-zA-Z-]", "");
                 if(name.isEmpty()) throw new ConfigException(Lang.translate("error.emojigroup.name.empty"), section);
@@ -138,11 +139,11 @@ class EmojiGroup implements AbstractEmoji {
     /**
      * Parses a string, replaces all emoticons with emojis.
      * Does this for all sub-groups and child emojis
-     * @param player
-     * @param resetColor
-     * @param message
+     * @param player The player which its being parsed for
+     * @param resetColor The default color it should go to after the emoji is inserted
+     * @param message The message which should be parsed
      */
-    String parse(Player player, String resetColor, String message) {
+    String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message) {
         for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message);
         for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message);
         return message;
@@ -152,9 +153,9 @@ class EmojiGroup implements AbstractEmoji {
     /**
      * Returns {@link TextComponent} array to display in
      * list for each emoticons.
-     * @param player
+     * @param player The player which the emoticons should be parsed for
      */
-    List<TextComponent> getComponents(Player player) {
+    List<TextComponent> getComponents(@NotNull Player player) {
         List<TextComponent> components = new ArrayList<>();
         getGroups().forEach(group -> components.addAll(group.getComponents(player)));
         getEmojis().forEach(emoji -> components.addAll(emoji.getComponent(player)));
@@ -162,18 +163,18 @@ class EmojiGroup implements AbstractEmoji {
     }
 
     /**
-     * Checks if key exists in {@link ConfigurationSecion} that matches the regular expression
-     * @param section
-     * @param regex
+     * Checks if key exists in {@link ConfigurationSection} that matches the regular expression
+     * @param section The configuration where it should be looking for
+     * @param regex The regular expression
      */
-    private boolean isSetKey(ConfigurationSection section, String regex) {
+    private boolean isSetKey(@NotNull ConfigurationSection section, @NotNull String regex) {
         for(String key : section.getKeys(false)) {
             if(key.toLowerCase().matches(regex)) return true;
         }
         return false;
     }
 
-	public void forEach(Consumer<AbstractEmoji> action) {
+	public void forEach(@NotNull Consumer<AbstractEmoji> action) {
 		groups.forEach(action);
 		emojis.forEach(action);
 	}
