@@ -1,7 +1,26 @@
 package com.rmjtromp.chatemojis;
 
-import static com.rmjtromp.chatemojis.ChatEmojis.NAME_PATTERN;
-import static com.rmjtromp.chatemojis.ChatEmojis.RANDOM;
+import com.rmjtromp.chatemojis.ChatEmojis.AbstractEmoji;
+import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import com.rmjtromp.chatemojis.exceptions.InvalidEmojiException;
+import com.rmjtromp.chatemojis.exceptions.InvalidEmoticonException;
+import com.rmjtromp.chatemojis.exceptions.InvalidRegexException;
+import com.rmjtromp.chatemojis.utils.ComponentBuilder;
+import com.rmjtromp.chatemojis.utils.Lang;
+import com.rmjtromp.chatemojis.utils.bukkit.ComponentUtils;
+import com.rmjtromp.chatemojis.utils.bukkit.Version;
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,30 +28,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
-
-import com.rmjtromp.chatemojis.ChatEmojis.AbstractEmoji;
-import com.rmjtromp.chatemojis.exceptions.ConfigException;
-import com.rmjtromp.chatemojis.exceptions.InvalidEmojiException;
-import com.rmjtromp.chatemojis.exceptions.InvalidEmoticonException;
-import com.rmjtromp.chatemojis.exceptions.InvalidRegexException;
-import com.rmjtromp.chatemojis.utils.Lang;
-import com.rmjtromp.chatemojis.utils.Lang.Replacements;
-import com.rmjtromp.chatemojis.utils.bukkit.ComponentUtils;
-import com.rmjtromp.chatemojis.utils.bukkit.Version;
-
-import me.clip.placeholderapi.PlaceholderAPI;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
-import org.jetbrains.annotations.NotNull;
+import static com.rmjtromp.chatemojis.ChatEmojis.NAME_PATTERN;
+import static com.rmjtromp.chatemojis.ChatEmojis.RANDOM;
 
 class Emoji implements AbstractEmoji {
 
@@ -290,27 +287,40 @@ class Emoji implements AbstractEmoji {
     }
 
     /**
-     * Returns {@link TextComponent} array to display in
+     * Returns {@link BaseComponent[]} List to display in
      * list for each emoticons.
      * @param player The player which the emoticon should be parsed for
      */
 	@SuppressWarnings("deprecation")
-	List<TextComponent> getComponent(@NotNull Player player) {
-        List<TextComponent> components = new ArrayList<>();
+	List<BaseComponent[]> getComponent(@NotNull Player player) {
+        List<BaseComponent[]> components = new ArrayList<>();
         emoticons.forEach(emoticon -> {
-            TextComponent comp = ComponentUtils.createComponent(String.format("&7  - &e%s &7- &f%s", emoticon, parse(player, ChatColor.RESET+"", emoticon)));
+            // parse the message and ignore whether the player has the right permissions or not
+            ComponentBuilder builder = new ComponentBuilder(String.format("&7  - &e%s &7- &f%s", emoticon, parse(player, ChatColor.RESET+"", emoticon, true)));
+
+            // add hover and click events if player has admin permissions
             if(player.hasPermission("chatemojis.admin")) {
-            	BaseComponent[] hoverMessage = ComponentUtils.createBaseComponent(Lang.translate("error.emoji.hover-component", Replacements.singleton("permission", permission.getName())));
-            	
-            	// new Text(BaseComponent[]) is not added until 1.16
-            	if(Version.getServerVersion().isOlderThan(Version.V1_16)) comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage));
-            	else comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage)));
+                String[] lines = new String[] {
+                        ChatColor.WHITE+Lang.translate("command.general.permission-node")+":",
+                        ChatColor.GRAY+getPermission().getName(),
+                        "",
+                        ChatColor.YELLOW+Lang.translate("command.general.click-to-copy")+"!"
+                };
+            	BaseComponent[] hoverMessage = ComponentUtils.createBaseComponent(String.join("\n", lines));
+
+                // new Text(BaseComponent[]) is not added until 1.16
+                HoverEvent hoverEvent;
+                if(Version.getServerVersion().isOlderThan(Version.V1_16)) hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage);
+                else hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage));
+            	builder.event(hoverEvent);
             	
             	// ClickEvent.Action.COPY_TO_CLIPBOARD is not added until 1.15
-            	if(Version.getServerVersion().isOlderThan(Version.V1_15)) comp.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getPermission().getName()));
-            	else comp.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, getPermission().getName()));
+                ClickEvent clickEvent;
+            	if(Version.getServerVersion().isOlderThan(Version.V1_15)) clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getPermission().getName());
+            	else clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, getPermission().getName());
+            	builder.event(clickEvent);
             }
-            components.add(comp);
+            components.add(builder.create());
         });
         return components;
     }
