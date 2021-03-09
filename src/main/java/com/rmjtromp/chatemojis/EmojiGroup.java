@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -135,7 +136,7 @@ class EmojiGroup implements AbstractEmoji {
     public List<Emoji> getEmojis() {
         return emojis;
     }
-    
+
     /**
      * Parses a string, replaces all emoticons with emojis.
      * Does this for all sub-groups and child emojis
@@ -144,8 +145,20 @@ class EmojiGroup implements AbstractEmoji {
      * @param message The message which should be parsed
      */
     String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message) {
-        for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message);
-        for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message);
+        return parse(player, resetColor, message, false);
+    }
+    
+    /**
+     * Parses a string, replaces all emoticons with emojis.
+     * Does this for all sub-groups and child emojis
+     * @param player The player which its being parsed for
+     * @param resetColor The default color it should go to after the emoji is inserted
+     * @param message The message which should be parsed
+     * @param forced Whether or not player permissions should be ignored
+     */
+    String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
+        for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message, forced);
+        for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message, forced);
         return message;
 
     }
@@ -155,8 +168,8 @@ class EmojiGroup implements AbstractEmoji {
      * list for each emoticons.
      * @param player The player which the emoticons should be parsed for
      */
-    List<TextComponent> getComponents(@NotNull Player player) {
-        List<TextComponent> components = new ArrayList<>();
+    List<BaseComponent[]> getComponents(@NotNull Player player) {
+        List<BaseComponent[]> components = new ArrayList<>();
         getGroups().forEach(group -> components.addAll(group.getComponents(player)));
         getEmojis().forEach(emoji -> components.addAll(emoji.getComponent(player)));
         return components;

@@ -265,7 +265,19 @@ class Emoji implements AbstractEmoji {
      * @param message The message which should be parsed
      */
     String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message) {
-        if(isEnabled() && player.hasPermission(getPermission())) {
+        return parse(player, resetColor, message, false);
+    }
+
+    /**
+     * Parses a string
+     * replaces all emoticons with emojis
+     * @param player The player which its being parsed for
+     * @param resetColor The default color it should go to after the emoji is inserted
+     * @param message The message which should be parsed
+     * @param forced Whether or not player permissions should be ignored
+     */
+    String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
+        if(isEnabled() && (forced || player.hasPermission(getPermission()))) {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
             	if(getEmojis().size() > 1) {
