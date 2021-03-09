@@ -51,9 +51,8 @@ final class CommandHandler {
 		pluginCommand.setExecutor((sender, command, label, args) -> {
 			if(args.length == 0) {
 				// if player, show list of emojis, if not player, show list of commands
-				String[] nArgs = args.length > 1 ? Arrays.copyOfRange(args, 1, args.length) : new String[0];
-				if(sender instanceof Player) subCommands.get("list").executor.onCommand(sender, command, label, nArgs);
-				else subCommands.get("help").executor.onCommand(sender, command, label, nArgs);
+				if(sender instanceof Player) subCommands.get("list").executor.onCommand(sender, command, label, args);
+				else subCommands.get("help").executor.onCommand(sender, command, label, args);
 			} else {
 				for(SubCommand subCommand : subCommands.values()) {
 					if(subCommand.name.equalsIgnoreCase(args[0])) {
