@@ -1,16 +1,13 @@
 package com.rmjtromp.chatemojis;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
+import com.rmjtromp.chatemojis.exceptions.UnsupportedVersionException;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,18 +27,19 @@ import org.jetbrains.annotations.NotNull;
 public final class ChatEmojis extends JavaPlugin {
 
     static final List<String> RESERVED_NAMES = Arrays.asList("emoticon", "emoji", "regex", "enabled");
-    static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^\\.]+?)$", Pattern.CASE_INSENSITIVE);
+    static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^.]+?)$", Pattern.CASE_INSENSITIVE);
     static final Random RANDOM = new Random();
 
-
+	// plugin stuff
     private static ChatEmojis plugin = null;
     private EmojiGroup emojis = null;
     private Settings settings = null;
-    
+
+    // soft dependencies
     boolean papiIsLoaded = false;
     boolean essentialsIsLoaded = false;
     
-    // inventories
+    // configs
     Config config = null;
     Config emojisConfig = null;
 
@@ -49,9 +47,9 @@ public final class ChatEmojis extends JavaPlugin {
         plugin = this;
 
         // load base (also default) language
-		try(InputStream in = getResource("lang/en_US.yml")) {
-			assert in != null;
-			Lang.load(new StringReader(IOUtils.toString(in, StandardCharsets.UTF_8)));
+		try(InputStream in = getResource("lang/en_US.yml");
+			InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+			Lang.load(reader);
 		}
     }
     
@@ -59,8 +57,8 @@ public final class ChatEmojis extends JavaPlugin {
     public void onLoad() {
         try {
         	// load configs
-			config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml.gz");
-			emojisConfig = Config.init(new File(getDataFolder(), "emojis.yml"), "emojis.yml.gz");
+			config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
+			emojisConfig = Config.init(new File(getDataFolder(), "emojis.yml"), "emojis.yml");
 			
 			// load settings
 	        settings = new Settings();
@@ -88,7 +86,9 @@ public final class ChatEmojis extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		if(Version.getServerVersion() == null) {
+    	try {
+			Version.getServerVersion();
+		} catch(UnsupportedVersionException e) {
 			System.out.println("[ChatEmojis] "+Lang.translate("error.load.unsupported-version"));
 			System.out.println("[ChatEmojis] "+Lang.translate("error.load.disabling-plugin"));
 			getServer().getPluginManager().disablePlugin(this);
@@ -111,8 +111,8 @@ public final class ChatEmojis extends JavaPlugin {
 		
 		/*
 		 * emojis config is not being modified by the plugin right now
-		 * therefore saving it is pointless
-		 * emojisConfig.forceSave();
+		 * therefore saving it is pointless at the moment
+		 * // emojisConfig.forceSave();
 		 */
 	}
     
