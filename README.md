@@ -47,9 +47,9 @@ and if you're able to translate from English, please create a pull request.
 
 All language files can be found [here](https://github.com/Mxlvin/ChatEmojis/tree/2.2.1/src/main/resources/lang).
 
-| Language | Country | Translator(s) | Code |
+| Name | Region | Code | Translator(s) |
 | ------ | ------ | ------ | ------ |
-| English | US | [RMJTromp](https://github.com/Mxlvin) | en_US |
+| English | US | en_US | [RMJTromp](https://github.com/Mxlvin) |
 
 # Emoji List (Screenshot)
 ![List of Emojis](https://i.imgur.com/B0s6wga.png)
