@@ -3,12 +3,16 @@ package com.rmjtromp.chatemojis.utils;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,7 +87,7 @@ public final class Lang {
 					Matcher matcher = pattern.matcher(string);
 					if(matcher.find()) string = matcher.replaceAll(entry.getValue());
 				}
-				return string;
+				return ChatColor.stripColor(string);
 			}
 		} else if(language != null && (language.isString(key) || language.isList(key))) {
 			String string = language.isString(key) ? language.getString(key) : String.join("\n", language.getStringList(key));
@@ -95,7 +99,7 @@ public final class Lang {
 					Matcher matcher = pattern.matcher(string);
 					if(matcher.find()) string = matcher.replaceAll(entry.getValue());
 				}
-				return string;
+				return ChatColor.stripColor(string);
 			}
 		}
 		throw new NullPointerException(String.format("Could not find key `%s` in language files.", key));
@@ -113,9 +117,52 @@ public final class Lang {
 		if(layeredLanguage == null && language == null) throw new NullPointerException("No language file provided");
 		
 		if(layeredLanguage != null && (layeredLanguage.isString(key) || layeredLanguage.isList(key))) {
-			return layeredLanguage.isString(key) ? layeredLanguage.getString(key) : String.join("\n", layeredLanguage.getStringList(key));
+			return ChatColor.stripColor(layeredLanguage.isString(key) ? layeredLanguage.getString(key) : String.join("\n", layeredLanguage.getStringList(key)));
 		} else if(language != null && (language.isString(key) || language.isList(key))) {
-			return language.isString(key) ? language.getString(key) : String.join("\n", language.getStringList(key));
+			return ChatColor.stripColor(language.isString(key) ? language.getString(key) : String.join("\n", language.getStringList(key)));
+		} else throw new NullPointerException(String.format("Could not find key `%s` in language files.", key));
+	}
+
+	public static List<String> getTranslators() {
+		if(layeredLanguage == null && language == null) throw new NullPointerException("No language file provided");
+		final String key = "translators";
+		final List<String> translators = new ArrayList<>();
+		if(layeredLanguage != null && layeredLanguage.isSet(key)) {
+			if(layeredLanguage.isString(key)) {
+				String translator = layeredLanguage.getString(key);
+				if(translator != null && !translator.isEmpty()) translators.add(translator);
+			} else if(layeredLanguage.isList(key)) {
+				List<?> translators_ = layeredLanguage.getList(key);
+				if(translators_ != null && !translators_.isEmpty()) {
+					translators_.stream()
+							.filter(translator -> translator instanceof String && !((String) translator).isEmpty())
+							.map(translator -> (String) translator)
+							.forEach(translators::add);
+				}
+			} else {
+				ConfigurationSection section = layeredLanguage.getConfigurationSection(key);
+				Set<String> keys = section.getKeys(false);
+				keys.stream().filter(translator -> !translator.isEmpty()).forEach(translators::add);
+			}
+			return translators;
+		} else if(language != null && language.isSet(key)) {
+			if(language.isString(key)) {
+				String translator = language.getString(key);
+				if(translator != null && !translator.isEmpty()) translators.add(translator);
+			} else if(language.isList(key)) {
+				List<?> translators_ = language.getList(key);
+				if(translators_ != null && !translators_.isEmpty()) {
+					translators_.stream()
+							.filter(translator -> translator instanceof String && !((String) translator).isEmpty())
+							.map(translator -> (String) translator)
+							.forEach(translators::add);
+				}
+			} else {
+				ConfigurationSection section = language.getConfigurationSection(key);
+				Set<String> keys = section.getKeys(false);
+				keys.stream().filter(translator -> !translator.isEmpty()).forEach(translators::add);
+			}
+			return translators;
 		} else throw new NullPointerException(String.format("Could not find key `%s` in language files.", key));
 	}
 	
