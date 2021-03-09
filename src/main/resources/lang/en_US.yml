@@ -5,7 +5,7 @@ language:
   code: en_US
 
 translators:
-  Mxlvin: 'https://github.com/Mxlvin'
+  RMJTromp: 'https://github.com/Mxlvin'
 
 error:
   load:
@@ -33,20 +33,23 @@ error:
       empty: Emoji can not be empty
       not-supported: Emoji type not supported
       not-provided: No emoji provided
-    hover-component:
-      - '&fPermission Node:'
-      - '&7${permission}'
-      - ''
-      - '&eClick To Copy!'
 
 command:
   general:
     list-of-commands: List of Commands
-    must-be-player-to-use-command: '&cYou must be a player to use this command.'
-    not-enough-permissions: '&cYou don''t have enough permission to use this command.'
-    too-many-arguments: '&cToo many arguments. Try "/${label} help" for a list of commands.'
-    unknown-argument: '&cUnknown argument. Try "/${label} help" for a list of commands.'
-    not-enough-arguments: '&cNot enough arguments. Try "/${label} help" for a list of commands.'
+    must-be-player-to-use-command: You must be a player to use this command.
+    not-enough-permissions: You don't have enough permission to use this command.
+    too-many-arguments: Too many arguments. Try "/${label} help" for a list of commands.
+    unknown-argument: Unknown argument. Try "/${label} help" for a list of commands.
+    not-enough-arguments: Not enough arguments. Try "/${label} help" for a list of commands.
+    permission-node: Permission Node
+    click-to-copy: Click To Copy
+    version: Version
+    author: Author
+    authors: Authors
+    translator: Translator
+    translators: Translators
+    click-to-open-spigot-page: Click to open Spigot resource page.
   sub-commands:
     list:
       name: list
@@ -57,21 +60,13 @@ command:
     reload:
       name: reload
       description: Reloads configuration files
-      complete: '&eAll configuration files have been reloaded &7(${interval}ms)'
+      complete: All configuration files have been reloaded
     settings:
       name: settings
       description: Opens settings menu
     info:
       name: info
       description: View Plugin Information
-  info:
-    hover-component:
-      - '&6ChatEmojis'
-      - '&7Version: &e2.2.1b108'
-      - '&7Author: &eRMJTromp'
-      - '&7Translator: &eN/A'
-      - ''
-      - '&eClick to open spigot resource page.'
 
 gui:
   general:
@@ -80,9 +75,9 @@ gui:
     next-page: Next Page
     toggle-yes: 'Yes'
     toggle-no: 'No'
-    go-back: 'Go Back'
-    state-enabled: 'Enabled'
-    state-disabled: 'Disabled'
+    go-back: Go Back
+    state-enabled: Enabled
+    state-disabled: Disabled
   settings:
     title: ChatEmoji Settings
     plugin:
@@ -97,7 +92,7 @@ gui:
         - settings
   world-selector:
     error:
-      world-not-found: 'Can''t find the world this item is bounded it'
+      world-not-found: Can't find the world this item is bounded it
       item-data-error: There was an error grabbing item data. Please check console and report to developer.
       world-unloaded: A world was unloaded and is therefore no longer available
     title: World Selector
@@ -114,8 +109,8 @@ gui:
         - 'Utilize in Books: ${book-toggle}'
     world:
       description:
-        - Left-Click to edit world settings
-        - Right-Click to restore default settings
+        - 'Left-Click to edit world settings'
+        - 'Right-Click to restore default settings'
         - ''
         - 'Utilize in Chat: ${chat-toggle}'
         - 'Utilize on Signs: ${sign-toggle}'
@@ -123,7 +118,7 @@ gui:
       error-description:
         - There was an error adding NBT data to
         - this item, meaning clicking this item
-        - 'won''t work. Please check console and'
+        - won't work. Please check console and
         - report to the developer for a fix.
   world-settings:
     title: World Settings
@@ -165,12 +160,12 @@ gui:
         restored: 'All settings were restored to default for world: ${world}'
       global:
         chat:
-          enabled: 'Emojis in chat have been enabled globally'
-          disabled: 'Emojis in chat have been disabled globally'
+          enabled: Emojis in chat have been enabled globally
+          disabled: Emojis in chat have been disabled globally
         books:
-          enabled: 'Emojis in books have been enabled globally'
-          disabled: 'Emojis in books have been disabled globally'
+          enabled: Emojis in books have been enabled globally
+          disabled: Emojis in books have been disabled globally
         signs:
-          enabled: 'Emojis on signs have been enabled globally'
-          disabled: 'Emojis on signs have been disabled globally'
-        restored: 'All settings were restored to default globally'
+          enabled: Emojis on signs have been enabled globally
+          disabled: Emojis on signs have been disabled globally
+        restored: All settings were restored to default globally
