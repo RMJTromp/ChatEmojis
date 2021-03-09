@@ -1,7 +1,7 @@
 package com.rmjtromp.chatemojis.utils.bukkit;
 
+import com.rmjtromp.chatemojis.exceptions.UnsupportedVersionException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -27,16 +27,16 @@ public enum Version {
 
 	/**
 	 * Returns the {@link Version} enumeration of the server version
-	 * @return Version
+	 * @return The server's {@link Version}
+	 * @throws UnsupportedVersionException Thrown if the server's version is not supported
 	 */
-	@Nullable
 	public static Version getServerVersion() {
 		if(serverVersion != null) return serverVersion;
 		String v = BukkitUtils.getServerVersion().substring(1);
 		for(Version version : Version.values()) {
 			if(v.startsWith(version.toString().replace(".", "_"))) return (serverVersion = version);
 		}
-		return null;
+		throw new UnsupportedVersionException("Server version not supported");
 	}
 	
 	/**
