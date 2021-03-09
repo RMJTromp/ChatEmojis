@@ -1,14 +1,13 @@
 package com.rmjtromp.chatemojis.exceptions;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 
 public class ConfigException extends Exception {
-
-	private static final long serialVersionUID = 7126649646035356471L;
 	
 	private final ConfigurationSection section;
 
-    public ConfigException(String message, ConfigurationSection section) {
+    public ConfigException(@NotNull String message, @NotNull ConfigurationSection section) {
         super(message + " At: "+section.getCurrentPath());
         this.section = section;
     }

@@ -1,12 +1,11 @@
 package com.rmjtromp.chatemojis.exceptions;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 
 public final class InvalidEmojiException extends ConfigException {
 
-	private static final long serialVersionUID = 1512370625216965862L;
-
-	public InvalidEmojiException(String message, ConfigurationSection section) {
+	public InvalidEmojiException(@NotNull String message, @NotNull ConfigurationSection section) {
         super(message, section);
     }
 
