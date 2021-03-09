@@ -1,29 +1,23 @@
 package com.rmjtromp.chatemojis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
+import com.rmjtromp.chatemojis.gui.SettingsGUI;
+import com.rmjtromp.chatemojis.utils.ComponentBuilder;
+import com.rmjtromp.chatemojis.utils.Lang;
+import com.rmjtromp.chatemojis.utils.Lang.Replacements;
+import com.rmjtromp.chatemojis.utils.bukkit.ComponentUtils;
+import com.rmjtromp.chatemojis.utils.bukkit.Version;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 
-import com.rmjtromp.chatemojis.gui.SettingsGUI;
-import com.rmjtromp.chatemojis.utils.Lang;
-import com.rmjtromp.chatemojis.utils.Lang.Replacements;
-import com.rmjtromp.chatemojis.utils.bukkit.BukkitUtils;
-import com.rmjtromp.chatemojis.utils.bukkit.ComponentUtils;
-import com.rmjtromp.chatemojis.utils.bukkit.Version;
-
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import java.util.*;
 
 final class CommandHandler {
 	
@@ -58,7 +52,7 @@ final class CommandHandler {
 					if(subCommand.name.equalsIgnoreCase(args[0])) {
 						if(subCommand.permission == null || sender.hasPermission(subCommand.permission)) {
 							return subCommand.executor.onCommand(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
-						} else sender.sendMessage(ChatColor.RED+Lang.translate("command.general.not-enough-permissions"));
+						} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.not-enough-permissions"));
 					}
 				}
 			}
@@ -83,12 +77,11 @@ final class CommandHandler {
 				lines.add(String.format("&6ChatEmojis &7- &f%s", Lang.translate("command.general.list-of-commands")));
 				subCommands.values().forEach(cmd -> {
 					if (cmd.permission == null || sender.hasPermission(cmd.permission)) {
-						lines.add(String.format("&e/%s %s &e- &7%s", label, cmd.name, cmd.description));
+						lines.add(String.format("&e/%s %s &6- &7%s", label, cmd.name, cmd.description));
 					}
 				});
 				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.join("\n", lines)));
-			} else
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label))));
+			} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label)));
 			return true;
 		}));
 		
@@ -96,41 +89,59 @@ final class CommandHandler {
 		subCommands.put("list", new SubCommand(Lang.translate("command.sub-commands.list.name"), Lang.translate("command.sub-commands.list.description"), "chatemojis.list", (sender, command, label, args) -> {
 			if (args.length == 0) {
 				if (sender instanceof Player) {
-					TextComponent header = ComponentUtils.createComponent("&6ChatEmojis &7(v" + PLUGIN.getDescription().getVersion() + ")\n");
-					BaseComponent[] hoverMessage = ComponentUtils.createBaseComponent(Lang.translate("command.info.hover-component", Replacements.singleton("version", PLUGIN.getDescription().getVersion())));
+					// emoji list header
+					TextComponent header = ComponentUtils.createComponent("&6ChatEmojis &7(v" + PLUGIN.getDescription().getVersion() + ")");
 
-					if (Version.getServerVersion().isOlderThan(Version.V1_16))
-						header.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage));
+					// emoji list header hover component
+					List<String> translators = Lang.getTranslators();
+					List<String> authors = PLUGIN.getDescription().getAuthors();
+					String[] lines = new String[] {
+							ChatColor.GOLD + "ChatEmojis",
+							ChatColor.GRAY + Lang.translate("command.general.version") +": " + ChatColor.YELLOW + PLUGIN.getDescription().getVersion(),
+							ChatColor.GRAY + Lang.translate(translators.size() > 1 ? "command.general.authors" : "command.general.author") + ": " + ChatColor.YELLOW + String.join(ChatColor.GRAY + ", " + ChatColor.YELLOW, authors),
+							ChatColor.GRAY + Lang.translate(translators.size() > 1 ? "command.general.translators" : "command.general.translator") + ": " + ChatColor.YELLOW + String.join(ChatColor.GRAY + ", " + ChatColor.YELLOW, translators),
+							"",
+							ChatColor.YELLOW + Lang.translate("command.general.click-to-open-spigot-page")
+					};
+					BaseComponent[] hoverMessage = ComponentUtils.createBaseComponent(String.join("\n", lines));
+
+					// set the hover component for the header
+					if (Version.getServerVersion().isOlderThan(Version.V1_16)) header.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage));
 					else header.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage)));
 
+					// set the click event for the header
 					header.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/chatemojis.88027/"));
 
+					// send the header
+					((Player) sender).spigot().sendMessage(header);
 
-					if (Version.getServerVersion().isOlderThan(Version.V1_9)) {
-						try {
-							// when I tried sending the whole component I got errors
-							// so I'm sending them in groups of 5 instead
-							Player player = (Player) sender;
-							BukkitUtils.sendComponent(player, header);
+					// get all components for all emojis
+					List<BaseComponent[]> components = PLUGIN.getEmojis().getComponents((Player) sender);
 
-							List<TextComponent> components = PLUGIN.getEmojis().getComponents((Player) sender);
-							while (!components.isEmpty()) {
-								TextComponent component = components.get(0);
-								BukkitUtils.sendComponent((Player) sender, component);
-								components.remove(component);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
+					// keep looping until the list is empty
+					// Emoji messages are sent in groups of 10, because
+					// if too many are sent at once, it'll kick you out of the server
+					// because it cant parse it (client-side) if the message
+					// is longer than Integer.MAX_VALUE.
+					// And I don't know how to calculate the length.
+					while(!components.isEmpty()) {
+						ComponentBuilder builder = new ComponentBuilder();
+
+						// grab the first 10 items in list and add it to the builder
+						List<BaseComponent[]> comps = components.subList(0, Math.min(components.size(), 9));
+						for(int i = 0; i < comps.size(); i++) {
+							if(i != 0) builder.append("\n");
+							builder.append(comps.get(i));
 						}
-					} else {
-						TextComponent body = ComponentUtils.joinComponents("\n", PLUGIN.getEmojis().getComponents((Player) sender));
-						TextComponent message = ComponentUtils.mergeComponents(header, body);
-						((Player) sender).spigot().sendMessage(message);
+
+						// remove items from list
+						components.removeAll(comps);
+
+						// send message
+						((Player) sender).spigot().sendMessage(builder.create());
 					}
-				} else
-					sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.must-be-player-to-use-command")));
-			} else
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label))));
+				} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.must-be-player-to-use-command"));
+			} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label)));
 			return true;
 		}));
 		
@@ -140,9 +151,8 @@ final class CommandHandler {
 				long start = System.currentTimeMillis();
 				PLUGIN.reload();
 				long interval = System.currentTimeMillis() - start;
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.sub-commands.reload.complete", Replacements.singleton("interval", Long.toString(interval)))));
-			} else
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label))));
+				sender.sendMessage(ChatColor.GRAY + Lang.translate("command.sub-commands.reload.complete") + " " + ChatColor.YELLOW + String.format("(%sms)", interval));
+			} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label)));
 			return true;
 		}));
 		
@@ -150,20 +160,16 @@ final class CommandHandler {
 		subCommands.put("settings", new SubCommand(Lang.translate("command.sub-commands.settings.name"), Lang.translate("command.sub-commands.settings.description"), "chatemojis.admin", (sender, command, label, args) -> {
 			if (args.length == 0) {
 				if (sender instanceof Player) ((Player) sender).openInventory(settingsGui.inventory);
-				else
-					sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.must-be-player-to-use-command")));
-			} else
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label))));
+				else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.must-be-player-to-use-command"));
+			} else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label)));
 			return true;
 		}));
 
 		// add info command
-		// TODO
+		// TODO Finish info command
 		subCommands.put("info", new SubCommand(Lang.translate("command.sub-commands.info.name"), Lang.translate("command.sub-commands.info.description"), (sender, command, label, args) -> {
-			if (args.length == 0) {
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eWork In Progress"));
-			} else
-				sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label))));
+			if (args.length == 0) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eWork In Progress"));
+			else sender.sendMessage(ChatColor.RED + Lang.translate("command.general.too-many-arguments", Replacements.singleton("label", label)));
 			return true;
 		}));
 	}
