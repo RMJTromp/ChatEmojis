@@ -100,9 +100,10 @@ public class Config extends YamlConfiguration {
                             save(file);
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } finally {
+                            timer.cancel();
+                            timerIsRunning = false;
                         }
-                        timer.cancel();
-                        timerIsRunning = false;
                     }
                 }
             }, 5100, 1000);
