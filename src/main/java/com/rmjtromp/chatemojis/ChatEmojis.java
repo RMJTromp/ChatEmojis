@@ -87,8 +87,10 @@ public final class ChatEmojis extends JavaPlugin {
         
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
         settingsGui = Bukkit.createInventory(null, InventoryType.HOPPER, ChatColor.DARK_GRAY+"ChatEmojis Settings");
-        
-        ItemStack barrier = new ItemStack(Material.BARRIER);
+
+        ItemStack barrier;
+        if(Version.getServerVersion().isNewerThan(Version.V1_7)) barrier = new ItemStack(Material.BARRIER);
+        else barrier = new ItemStack(Material.valueOf("STAINED_GLASS_PANE"), 1, (short) 14);
         ItemMeta barrierMeta = barrier.getItemMeta();
         barrierMeta.setDisplayName(ChatColor.RED+"Close");
         barrier.setItemMeta(barrierMeta);
@@ -100,17 +102,17 @@ public final class ChatEmojis extends JavaPlugin {
         Arrays.asList("&7Click this item to toggle whether or not", "&7emojis can be used in books.").forEach(lore -> bookLore.add(ChatColor.translateAlternateColorCodes('&', lore)));
         bookMeta.setLore(bookLore);
         if(useInBooks) bookMeta.addEnchant(Enchantment.LURE, 1, true);
-    	bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        if(Version.getServerVersion().isNewerThan(Version.V1_7)) bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         book.setItemMeta(bookMeta);
         
-        ItemStack sign = new ItemStack(Version.getServerVersion().isNewerThan(Version.V1_14) ? Material.valueOf("OAK_SIGN") : Material.valueOf("SIGN"));
+        ItemStack sign = new ItemStack(Version.getServerVersion().isNewerThan(Version.V1_13) ? Material.valueOf("OAK_SIGN") : Material.valueOf("SIGN"));
         ItemMeta signMeta = sign.getItemMeta();
         signMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lSigns"));
         List<String> signLore = new ArrayList<>();
         Arrays.asList("&7Click this item to toggle whether or not", "&7emojis can be used on signs.").forEach(lore -> signLore.add(ChatColor.translateAlternateColorCodes('&', lore)));
         signMeta.setLore(signLore);
         if(useOnSigns) signMeta.addEnchant(Enchantment.LURE, 1, true);
-    	signMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        if(Version.getServerVersion().isNewerThan(Version.V1_7)) signMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         sign.setItemMeta(signMeta);
 
         settingsGui.setItem(0, book);
@@ -179,6 +181,7 @@ public final class ChatEmojis extends JavaPlugin {
             		if(e.getCurrentItem() != null) {
             			if(e.getCurrentItem().equals(barrier)) e.getWhoClicked().closeInventory();
             			else if(e.getCurrentItem().equals(book) || e.getCurrentItem().equals(sign)) {
+                            Player player = (Player) e.getWhoClicked();
             				if(e.getCurrentItem().equals(book)) {
                 				useInBooks = !useInBooks;
                 				
@@ -187,10 +190,9 @@ public final class ChatEmojis extends JavaPlugin {
                 				else if(bookMeta.hasEnchant(Enchantment.LURE)) bookMeta.removeEnchant(Enchantment.LURE);
                 				book.setItemMeta(bookMeta);
                 				settingsGui.setItem(0, book);
-                				
-                				e.getWhoClicked().sendMessage(ChatColor.translateAlternateColorCodes('&', useInBooks ? "&7You can now use emojis in books." : "&7You can no longer use emojis in books."));
-//                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
-            				} else {
+
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', useInBooks ? "&7You can now use emojis in books." : "&7You can no longer use emojis in books."));
+                            } else {
             					useOnSigns = !useOnSigns;
             					
                 				ItemMeta signMeta = sign.getItemMeta();
@@ -198,12 +200,11 @@ public final class ChatEmojis extends JavaPlugin {
                 				else if(signMeta.hasEnchant(Enchantment.LURE)) signMeta.removeEnchant(Enchantment.LURE);
                 				sign.setItemMeta(signMeta);
                 				settingsGui.setItem(1, sign);
-                				
-                				e.getWhoClicked().sendMessage(ChatColor.translateAlternateColorCodes('&', useOnSigns ? "&7You can now use emojis on signs." : "&7You can no longer use emojis on signs."));
-//                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
-            				}
-            				
-            				lastUpdate = System.currentTimeMillis();
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', useOnSigns ? "&7You can now use emojis on signs." : "&7You can no longer use emojis on signs."));
+                            }
+                            player.playSound(e.getWhoClicked().getLocation(), Version.getServerVersion().isOlderThan(Version.V1_9) ? Sound.valueOf("NOTE_PLING") : Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+
+                            lastUpdate = System.currentTimeMillis();
             				if(!timerIsRunning) {
             					timerIsRunning = true;
                 				Timer timer = new Timer();
@@ -248,15 +249,20 @@ public final class ChatEmojis extends JavaPlugin {
                         else hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage));
                         builder.event(hoverEvent);
 
-                        emojis.getEmojis().forEach(emoji -> sender.sendMessage(emoji.parse(((Player) sender), "", emoji.getEmoticons().get(0), true)));
+                        Player player = (Player) sender;
+                        if(Version.getServerVersion().isOlderThan(Version.V1_8)) {
+                            // idk new-lines dont work on 1.7
+                            player.spigot().sendMessage(builder.create());
+                            emojis.getComponents((Player) sender).forEach(baseComponents -> player.spigot().sendMessage(baseComponents));
+                        } else {
+                            List<BaseComponent[]> components = emojis.getComponents((Player) sender);
+                            for(int i = 0; i < components.size(); i++) {
+                                builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
+                                if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                            }
 
-                        List<BaseComponent[]> components = emojis.getComponents((Player) sender);
-                        for(int i = 0; i < components.size(); i++) {
-                            builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
-                            if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                            player.spigot().sendMessage(builder.create());
                         }
-                        
-                        ((Player) sender).spigot().sendMessage(builder.create());
                     } else if(args.length == 1) {
                     	if(args[0].equalsIgnoreCase("help")) {
                     		List<String> lines = new ArrayList<>();
