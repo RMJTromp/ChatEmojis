@@ -1,13 +1,13 @@
 package com.rmjtromp.chatemojis;
 
-import com.rmjtromp.chatemojis.ChatEmojis.Emojis;
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
-import com.rmjtromp.chatemojis.ChatEmojis.EmojiGroups;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -17,8 +17,8 @@ import static com.rmjtromp.chatemojis.ChatEmojis.RESERVED_NAMES;
 
 class EmojiGroup {
 
-    private final Emojis emojis = new Emojis();
-    private final EmojiGroups groups = new EmojiGroups();
+    private final ArrayList<Emoji> emojis = new  ArrayList<>();
+    private final ArrayList<EmojiGroup> groups = new ArrayList<>();
 
     private final String name;
     private final Permission permission;
@@ -78,25 +78,25 @@ class EmojiGroup {
         return permission;
     }
 
-    public EmojiGroups getGroups() {
+    public ArrayList<EmojiGroup> getGroups() {
         return groups;
     }
 
-    public Emojis getEmojis() {
+    public ArrayList<Emoji> getEmojis() {
         return emojis;
     }
 
-    String parse(Player player, String resetColor, String message) {
-        for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message);
-        for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message);
+    public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
+        for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message, forced);
+        for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message, forced);
         return message;
 
     }
 
-    List<TextComponent> getComponents(Player player) {
-        List<TextComponent> components = new ArrayList<>();
+    public List<BaseComponent[]> getComponents(@NotNull Player player) {
+        List<BaseComponent[]> components = new ArrayList<>();
         getGroups().forEach(group -> components.addAll(group.getComponents(player)));
-        getEmojis().forEach(emoji -> components.addAll(emoji.getComponent(player)));
+        getEmojis().forEach(emoji -> components.addAll(emoji.getComponents(player)));
         return components;
     }
 

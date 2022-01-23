@@ -1,5 +1,7 @@
 package com.rmjtromp.chatemojis;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,10 +9,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
+import com.rmjtromp.chatemojis.utils.BukkitUtils;
+import com.rmjtromp.chatemojis.utils.ComponentBuilder;
+import com.rmjtromp.chatemojis.utils.Config;
+import com.rmjtromp.chatemojis.utils.Version;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,18 +41,19 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
-import com.rmjtromp.chatemojis.utils.ComponentUtils;
 
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.jetbrains.annotations.NotNull;
 
 public final class ChatEmojis extends JavaPlugin {
 
-    protected static final List<String> RESERVED_NAMES = Arrays.asList("emoticon", "emoji", "regex", "enabled");
-    protected static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^\\.]+?)$", Pattern.CASE_INSENSITIVE);
+    static final List<String> RESERVED_NAMES = Arrays.asList("emoticon", "emoji", "regex", "enabled");
+    static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^.]+?)$", Pattern.CASE_INSENSITIVE);
 
+    private final Config config;
     private EmojiGroup emojis = null;
     private static ChatEmojis plugin;
     private boolean papiIsLoaded = false;
@@ -52,14 +61,14 @@ public final class ChatEmojis extends JavaPlugin {
     private boolean useInBooks = true;
     private Inventory settingsGui = null;
 
-    public ChatEmojis() {
+    public ChatEmojis() throws IOException, InvalidConfigurationException {
         plugin = this;
+
+        config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
     }
 
 	@Override
 	public void onEnable() {
-        saveDefaultConfig();
-        
         if(getConfig().isSet("settings.use.books") && getConfig().isBoolean("settings.use.books")) {
         	if(getConfig().getBoolean("settings.use.books")) getConfig().set("settings.use.books", null);
         	else useInBooks = false;
@@ -94,7 +103,7 @@ public final class ChatEmojis extends JavaPlugin {
     	bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         book.setItemMeta(bookMeta);
         
-        ItemStack sign = new ItemStack(Material.OAK_SIGN);
+        ItemStack sign = new ItemStack(Version.getServerVersion().isNewerThan(Version.V1_14) ? Material.valueOf("OAK_SIGN") : Material.valueOf("SIGN"));
         ItemMeta signMeta = sign.getItemMeta();
         signMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lSigns"));
         List<String> signLore = new ArrayList<>();
@@ -113,7 +122,7 @@ public final class ChatEmojis extends JavaPlugin {
             @EventHandler
             public void onPlayerChat(AsyncPlayerChatEvent e) {
                 String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
-                e.setMessage(emojis.parse(e.getPlayer(), resetColor, e.getMessage()));
+                e.setMessage(emojis.parse(e.getPlayer(), resetColor, e.getMessage(), false));
             }
             
             @EventHandler
@@ -130,7 +139,7 @@ public final class ChatEmojis extends JavaPlugin {
             public void onSignChange(SignChangeEvent e) {
             	if(useOnSigns) {
                 	for(int i = 0; i < e.getLines().length; i++) {
-                		e.setLine(i, emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i)));
+                		e.setLine(i, emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i), false));
                 	}
             	}
             }
@@ -140,7 +149,7 @@ public final class ChatEmojis extends JavaPlugin {
             	if(useInBooks) {
                 	List<String> newContent = new ArrayList<>();
                 	BookMeta meta = e.getNewBookMeta();
-                	meta.getPages().forEach(string -> newContent.add(emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(string), string)));
+                	meta.getPages().forEach(string -> newContent.add(emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(string), string, false)));
                 	meta.setPages(newContent);
                 	e.setNewBookMeta(meta);
             	}
@@ -180,7 +189,7 @@ public final class ChatEmojis extends JavaPlugin {
                 				settingsGui.setItem(0, book);
                 				
                 				e.getWhoClicked().sendMessage(ChatColor.translateAlternateColorCodes('&', useInBooks ? "&7You can now use emojis in books." : "&7You can no longer use emojis in books."));
-                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+//                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
             				} else {
             					useOnSigns = !useOnSigns;
             					
@@ -191,7 +200,7 @@ public final class ChatEmojis extends JavaPlugin {
                 				settingsGui.setItem(1, sign);
                 				
                 				e.getWhoClicked().sendMessage(ChatColor.translateAlternateColorCodes('&', useOnSigns ? "&7You can now use emojis on signs." : "&7You can no longer use emojis on signs."));
-                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+//                				((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
             				}
             				
             				lastUpdate = System.currentTimeMillis();
@@ -229,13 +238,25 @@ public final class ChatEmojis extends JavaPlugin {
             if(sender instanceof Player) {
                 if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
                     if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
-                        TextComponent header = ComponentUtils.createComponent("&6ChatEmojis &7(v"+getDescription().getVersion()+")\n");
-                        header.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ComponentUtils.createBaseComponent("&6ChatEmojis\n&7Version: &e"+getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page."))));
-                        header.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/chatemojis.88027/"));
+                        ComponentBuilder builder = new ComponentBuilder("&6ChatEmojis &7(v"+getDescription().getVersion()+")\n");
+
+                        BaseComponent[] hoverMessage = new ComponentBuilder("&6ChatEmojis\n&7Version: &e"+getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page.").create();
+
+                        // new Text(BaseComponent[]) is not added until 1.16
+                        HoverEvent hoverEvent;
+                        if(Version.getServerVersion().isOlderThan(Version.V1_16)) hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage);
+                        else hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage));
+                        builder.event(hoverEvent);
+
+                        emojis.getEmojis().forEach(emoji -> sender.sendMessage(emoji.parse(((Player) sender), "", emoji.getEmoticons().get(0), true)));
+
+                        List<BaseComponent[]> components = emojis.getComponents((Player) sender);
+                        for(int i = 0; i < components.size(); i++) {
+                            builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
+                            if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                        }
                         
-                        TextComponent body = ComponentUtils.joinComponents("\n", emojis.getComponents((Player) sender));
-                        TextComponent component = ComponentUtils.mergeComponents(header, body);
-                        sender.spigot().sendMessage(component);
+                        ((Player) sender).spigot().sendMessage(builder.create());
                     } else if(args.length == 1) {
                     	if(args[0].equalsIgnoreCase("help")) {
                     		List<String> lines = new ArrayList<>();
@@ -260,10 +281,8 @@ public final class ChatEmojis extends JavaPlugin {
                         		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+Long.toString(interval)+"ms)"));
                     		} else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
                     	} else if(args[0].equalsIgnoreCase("settings")) {
-                    		if(sender.hasPermission("chatemojis.admin")) {
-                        		if(sender instanceof Player) ((Player) sender).openInventory(settingsGui);
-                        		else sender.sendMessage(ChatColor.RED + "You must be a player to use this command.");
-                    		} else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
+                    		if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsGui);
+                    		else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
                     	} else if(args[0].toLowerCase().matches("^v(?:er(?:sion)?)?$")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7This server is currently running &eChatEmojis &7(v"+getDescription().getVersion()+")"));
                     	else sender.sendMessage(ChatColor.RED + "Unknown argument. Try \"/emoji help\" for a list of commands.");
                     } else sender.sendMessage(ChatColor.RED + "Too many arguments. Try \"/emoji help\" for a list of commands.");
@@ -272,7 +291,13 @@ public final class ChatEmojis extends JavaPlugin {
             return true;
         });
     }
-    
+
+    @NotNull
+    @Override
+    public Config getConfig() {
+        return config;
+    }
+
     boolean isPapiLoaded() {
     	return papiIsLoaded;
     }
@@ -280,13 +305,5 @@ public final class ChatEmojis extends JavaPlugin {
     static ChatEmojis getInstance() {
         return plugin;
     }
-
-    static class EmojiGroups extends ArrayList<EmojiGroup> {
-		private static final long serialVersionUID = 603062735230254276L;
-	}
-    
-    static class Emojis extends ArrayList<Emoji> {
-		private static final long serialVersionUID = 5307065755119322875L;
-	}
 
 }

@@ -9,6 +9,10 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.rmjtromp.chatemojis.utils.BukkitUtils;
+import com.rmjtromp.chatemojis.utils.ComponentBuilder;
+import com.rmjtromp.chatemojis.utils.Version;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,13 +24,13 @@ import com.rmjtromp.chatemojis.exceptions.ConfigException;
 import com.rmjtromp.chatemojis.exceptions.InvalidEmojiException;
 import com.rmjtromp.chatemojis.exceptions.InvalidEmoticonException;
 import com.rmjtromp.chatemojis.exceptions.InvalidRegexException;
-import com.rmjtromp.chatemojis.utils.ComponentUtils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.jetbrains.annotations.NotNull;
 
 class Emoji {
 
@@ -185,30 +189,50 @@ class Emoji {
         return parent;
     }
 
-    String parse(Player player, String resetColor, String message) {
-        if(isEnabled() && player.hasPermission(getPermission())) {
+    public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
+        if(isEnabled() && (forced || player.hasPermission(getPermission()))) {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
-            	if(getEmojis().size() > 1) {
-            		message = matcher.replaceFirst(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
-            		matcher = getPattern().matcher(message);
-            	} else message = matcher.replaceAll(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                if(getEmojis().size() > 1) {
+                    message = matcher.replaceFirst(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                    matcher = getPattern().matcher(message);
+                } else message = matcher.replaceAll(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
             }
         }
         return message;
     }
 
-	List<TextComponent> getComponent(Player player) {
-        List<TextComponent> components = new ArrayList<>();
-        TextComponent prefix = ComponentUtils.createComponent("&7  - ");
+    @SuppressWarnings("deprecation")
+    public List<BaseComponent[]> getComponents(@NotNull Player player) {
+        List<BaseComponent[]> components = new ArrayList<>();
         emoticons.forEach(emoticon -> {
-            TextComponent comp = ComponentUtils.createComponent(String.format("&e%s &7- &f%s", emoticon, getPattern().matcher(emoticon).replaceAll(PlaceholderAPI.setPlaceholders(player, getEmoji()))));
-            if(player.isOp()) {
-                comp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ComponentUtils.createBaseComponent("&fPermission Node:\n&7"+getPermission().getName()+"\n\n&eClick To Copy!"))));
-                comp.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, getPermission().toString()));
+            // parse the message and ignore whether the player has the right permissions or not
+            ComponentBuilder builder = new ComponentBuilder(String.format("&7  - &e%s &7- &f%s", emoticon, parse(player, ChatColor.RESET+"", emoticon, true)));
+
+            // add hover and click events if player has admin permissions
+            if(player.hasPermission("chatemojis.admin")) {
+                BaseComponent[] hoverMessage = new ComponentBuilder(String.join("\n", BukkitUtils.colorEncode(
+                        "&fPermission Node:",
+                        "&7" + getPermission().getName(),
+                        "",
+                        "&eClick to Copy!"
+                ))).create();
+
+                // new Text(BaseComponent[]) is not added until 1.16
+                HoverEvent hoverEvent;
+                if(Version.getServerVersion().isOlderThan(Version.V1_16)) hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage);
+                else hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage));
+                builder.event(hoverEvent);
+
+                // ClickEvent.Action.COPY_TO_CLIPBOARD is not added until 1.15
+                ClickEvent clickEvent;
+                if(Version.getServerVersion().isOlderThan(Version.V1_15)) clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, getPermission().getName());
+                else clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, getPermission().getName());
+                builder.event(clickEvent);
             }
-            components.add(ComponentUtils.mergeComponents(prefix, comp));
+            components.add(builder.create());
         });
         return components;
     }
+
 }

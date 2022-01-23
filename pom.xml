@@ -6,7 +6,7 @@
 
 	<groupId>com.rmjtromp</groupId>
 	<artifactId>ChatEmojis</artifactId>
-	<version>2.1.1b12</version>
+	<version>3.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>ChatEmojis</name>
@@ -33,6 +33,15 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
