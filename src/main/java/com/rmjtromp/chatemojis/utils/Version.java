@@ -22,7 +22,8 @@ public enum Version {
     V1_15,
     V1_16,
     V1_17,
-    V1_18;
+    V1_18,
+    V1_19;
 
     private static Version serverVersion = null;
 
