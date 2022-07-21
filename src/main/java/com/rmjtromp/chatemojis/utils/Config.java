@@ -103,6 +103,7 @@ public class Config extends YamlConfiguration {
                     if(System.currentTimeMillis() - lastSave >= 5000L) {
                         try {
                             save(file);
+                        } catch (NullPointerException ignore) {
                         } catch (IOException e) {
                             e.printStackTrace();
                         } finally {
@@ -185,6 +186,7 @@ public class Config extends YamlConfiguration {
          */
         @Nullable
         public T setValue(T value) {
+            if(valueReference == null) valueReference = new AtomicReference<>();
             valueReference.set(value);
             config.set(key, value);
             config.save();
