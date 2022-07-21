@@ -9,10 +9,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
-import com.rmjtromp.chatemojis.utils.BukkitUtils;
-import com.rmjtromp.chatemojis.utils.ComponentBuilder;
-import com.rmjtromp.chatemojis.utils.Config;
-import com.rmjtromp.chatemojis.utils.Version;
+import com.rmjtromp.chatemojis.utils.*;
+import com.rmjtromp.chatemojis.utils.Config.ConfigurationReference;
+import com.rmjtromp.chatemojis.windows.SettingsWindow;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,67 +56,29 @@ public final class ChatEmojis extends JavaPlugin {
     private EmojiGroup emojis = null;
     private static ChatEmojis plugin;
     private boolean papiIsLoaded = false;
-    private boolean useOnSigns = true;
-    private boolean useInBooks = true;
-    private Inventory settingsGui = null;
+    public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
+    private final SettingsWindow settingsWindow = new SettingsWindow(this);
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
         plugin = this;
 
         config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
+        useInBooks = config.reference("settings.use.books", true);
+        useOnSigns = config.reference("settings.use.signs", true);
     }
 
-	@Override
-	public void onEnable() {
-        if(getConfig().isSet("settings.use.books") && getConfig().isBoolean("settings.use.books")) {
-        	if(getConfig().getBoolean("settings.use.books")) getConfig().set("settings.use.books", null);
-        	else useInBooks = false;
-        }
-
-        if(getConfig().isSet("settings.use.signs") && getConfig().isBoolean("settings.use.signs")) {
-        	if(getConfig().getBoolean("settings.use.signs")) getConfig().set("settings.use.signs", null);
-        	else useOnSigns = false;
-        }
-        
+    @Override
+    public void onLoad() {
         try {
             emojis = EmojiGroup.init(getConfig());
         } catch (ConfigException e) {
             e.printStackTrace();
         }
-        
+    }
+
+    @Override
+	public void onEnable() {
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
-        settingsGui = Bukkit.createInventory(null, InventoryType.HOPPER, ChatColor.DARK_GRAY+"ChatEmojis Settings");
-
-        ItemStack barrier;
-        if(Version.getServerVersion().isNewerThan(Version.V1_7)) barrier = new ItemStack(Material.BARRIER);
-        else barrier = new ItemStack(Material.valueOf("STAINED_GLASS_PANE"), 1, (short) 14);
-        ItemMeta barrierMeta = barrier.getItemMeta();
-        barrierMeta.setDisplayName(ChatColor.RED+"Close");
-        barrier.setItemMeta(barrierMeta);
-        
-        ItemStack book = new ItemStack(Material.BOOK);
-        ItemMeta bookMeta = book.getItemMeta();
-        bookMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lBooks"));
-        List<String> bookLore = new ArrayList<>();
-        Arrays.asList("&7Click this item to toggle whether or not", "&7emojis can be used in books.").forEach(lore -> bookLore.add(ChatColor.translateAlternateColorCodes('&', lore)));
-        bookMeta.setLore(bookLore);
-        if(useInBooks) bookMeta.addEnchant(Enchantment.LURE, 1, true);
-        if(Version.getServerVersion().isNewerThan(Version.V1_7)) bookMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        book.setItemMeta(bookMeta);
-        
-        ItemStack sign = new ItemStack(Version.getServerVersion().isNewerThan(Version.V1_13) ? Material.valueOf("OAK_SIGN") : Material.valueOf("SIGN"));
-        ItemMeta signMeta = sign.getItemMeta();
-        signMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lSigns"));
-        List<String> signLore = new ArrayList<>();
-        Arrays.asList("&7Click this item to toggle whether or not", "&7emojis can be used on signs.").forEach(lore -> signLore.add(ChatColor.translateAlternateColorCodes('&', lore)));
-        signMeta.setLore(signLore);
-        if(useOnSigns) signMeta.addEnchant(Enchantment.LURE, 1, true);
-        if(Version.getServerVersion().isNewerThan(Version.V1_7)) signMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        sign.setItemMeta(signMeta);
-
-        settingsGui.setItem(0, book);
-        settingsGui.setItem(1, sign);
-        settingsGui.setItem(4, barrier);
 
         getServer().getPluginManager().registerEvents(new Listener() {
 
@@ -139,7 +100,7 @@ public final class ChatEmojis extends JavaPlugin {
             
             @EventHandler
             public void onSignChange(SignChangeEvent e) {
-            	if(useOnSigns) {
+            	if(Boolean.TRUE.equals(useOnSigns.getValue())) {
                 	for(int i = 0; i < e.getLines().length; i++) {
                 		e.setLine(i, emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i), false));
                 	}
@@ -148,88 +109,12 @@ public final class ChatEmojis extends JavaPlugin {
             
             @EventHandler
             public void onPlayerBookEdit(PlayerEditBookEvent e) {
-            	if(useInBooks) {
+            	if(Boolean.TRUE.equals(useInBooks.getValue())) {
                 	List<String> newContent = new ArrayList<>();
                 	BookMeta meta = e.getNewBookMeta();
                 	meta.getPages().forEach(string -> newContent.add(emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(string), string, false)));
                 	meta.setPages(newContent);
                 	e.setNewBookMeta(meta);
-            	}
-            }
-            
-            @EventHandler
-            public void onInventoryDrag(InventoryDragEvent e) {
-            	if(e.getInventory().equals(settingsGui)) e.setCancelled(true);
-            }
-            
-            @EventHandler
-            public void onInventoryInteract(InventoryInteractEvent e) {
-            	if(e.getInventory().equals(settingsGui)) e.setCancelled(true);
-            }
-            
-            @EventHandler
-            public void onInventoryMove(InventoryMoveItemEvent e) {
-            	if(e.getInitiator().equals(settingsGui)) e.setCancelled(true);
-            }
-
-            private long lastUpdate = 0L;
-            private boolean timerIsRunning = false;
-            @EventHandler
-            public void onInventoryClick(InventoryClickEvent e) {
-            	if(e.getInventory().equals(settingsGui)) {
-            		e.setCancelled(true);
-            		if(e.getCurrentItem() != null) {
-            			if(e.getCurrentItem().equals(barrier)) e.getWhoClicked().closeInventory();
-            			else if(e.getCurrentItem().equals(book) || e.getCurrentItem().equals(sign)) {
-                            Player player = (Player) e.getWhoClicked();
-            				if(e.getCurrentItem().equals(book)) {
-                				useInBooks = !useInBooks;
-                				
-                				ItemMeta bookMeta = book.getItemMeta();
-                				if(useInBooks) bookMeta.addEnchant(Enchantment.LURE, 1, true);
-                				else if(bookMeta.hasEnchant(Enchantment.LURE)) bookMeta.removeEnchant(Enchantment.LURE);
-                				book.setItemMeta(bookMeta);
-                				settingsGui.setItem(0, book);
-
-                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', useInBooks ? "&7You can now use emojis in books." : "&7You can no longer use emojis in books."));
-                            } else {
-            					useOnSigns = !useOnSigns;
-            					
-                				ItemMeta signMeta = sign.getItemMeta();
-                				if(useOnSigns) signMeta.addEnchant(Enchantment.LURE, 1, true);
-                				else if(signMeta.hasEnchant(Enchantment.LURE)) signMeta.removeEnchant(Enchantment.LURE);
-                				sign.setItemMeta(signMeta);
-                				settingsGui.setItem(1, sign);
-                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', useOnSigns ? "&7You can now use emojis on signs." : "&7You can no longer use emojis on signs."));
-                            }
-                            player.playSound(e.getWhoClicked().getLocation(), Version.getServerVersion().isOlderThan(Version.V1_9) ? Sound.valueOf("NOTE_PLING") : Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
-
-                            lastUpdate = System.currentTimeMillis();
-            				if(!timerIsRunning) {
-            					timerIsRunning = true;
-                				Timer timer = new Timer();
-                				timer.schedule(new TimerTask() {
-    								@Override
-    								public void run() {
-    									// if update happened more than 5 seconds ago then save
-    									// otherwise keep checking every 1 second;
-    									// this timer is to prevent spam saving to config
-    									if(System.currentTimeMillis() - lastUpdate >= 5000L) {
-    			            				if(!useInBooks) getConfig().set("settings.use.books", false);
-    			            				else if(getConfig().isSet("settings.use.books")) getConfig().set("settings.use.books", null);
-    			            				
-    			            				if(!useOnSigns) getConfig().set("settings.use.signs", false);
-    			            				else if(getConfig().isSet("settings.use.signs")) getConfig().set("settings.use.signs", null);
-    			            				
-    			            				saveConfig();
-    			            				timer.cancel();
-    			            				timerIsRunning = false;
-    									}
-    								}
-                				}, 5100, 1000);
-            				}
-            			}
-            		}
             	}
             }
 
@@ -287,7 +172,7 @@ public final class ChatEmojis extends JavaPlugin {
                         		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+Long.toString(interval)+"ms)"));
                     		} else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
                     	} else if(args[0].equalsIgnoreCase("settings")) {
-                    		if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsGui);
+                    		if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsWindow.getInventory());
                     		else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
                     	} else if(args[0].toLowerCase().matches("^v(?:er(?:sion)?)?$")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7This server is currently running &eChatEmojis &7(v"+getDescription().getVersion()+")"));
                     	else sender.sendMessage(ChatColor.RED + "Unknown argument. Try \"/emoji help\" for a list of commands.");
