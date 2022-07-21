@@ -1,51 +1,36 @@
 package com.rmjtromp.chatemojis;
 
+import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import com.rmjtromp.chatemojis.utils.BukkitUtils;
+import com.rmjtromp.chatemojis.utils.ComponentBuilder;
+import com.rmjtromp.chatemojis.utils.Config;
+import com.rmjtromp.chatemojis.utils.Config.ConfigurationReference;
+import com.rmjtromp.chatemojis.utils.Version;
+import com.rmjtromp.chatemojis.windows.SettingsWindow;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Pattern;
-
-import com.rmjtromp.chatemojis.utils.*;
-import com.rmjtromp.chatemojis.utils.Config.ConfigurationReference;
-import com.rmjtromp.chatemojis.windows.SettingsWindow;
-import net.md_5.bungee.api.chat.BaseComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import com.rmjtromp.chatemojis.exceptions.ConfigException;
-
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
-import org.jetbrains.annotations.NotNull;
 
 public final class ChatEmojis extends JavaPlugin {
 
@@ -57,10 +42,12 @@ public final class ChatEmojis extends JavaPlugin {
     private static ChatEmojis plugin;
     private boolean papiIsLoaded = false;
     public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
-    private final SettingsWindow settingsWindow = new SettingsWindow(this);
+    private SettingsWindow settingsWindow = null;
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
         plugin = this;
+
+        BukkitUtils.init(this);
 
         config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
         useInBooks = config.reference("settings.use.books", true);
@@ -78,6 +65,7 @@ public final class ChatEmojis extends JavaPlugin {
 
     @Override
 	public void onEnable() {
+        settingsWindow = new SettingsWindow(this);
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 
         getServer().getPluginManager().registerEvents(new Listener() {
