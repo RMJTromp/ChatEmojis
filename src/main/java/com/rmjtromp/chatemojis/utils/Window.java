@@ -89,8 +89,8 @@ public abstract class Window  {
 
         // destroy windows which has been inactive for more than 5 minutes and has no viewers
         Bukkit.getScheduler().scheduleSyncRepeatingTask(PLUGIN, () -> new ArrayList<>(WINDOWS.entrySet()).stream()
-            .filter(entry -> System.currentTimeMillis() - entry.getValue() > 3 * 60 * 1000 && entry.getKey().getInventory().getViewers().isEmpty())
-            .forEach(entry -> entry.getKey().destroy()), 5 * 60 * 20, 60 * 20);
+            .filter(entry -> entry.getKey().TTL != -1 && System.currentTimeMillis() - entry.getValue() > entry.getKey().TTL && entry.getKey().getInventory().getViewers().isEmpty())
+            .forEach(entry -> entry.getKey().destroy()), 60 * 20, 60 * 20);
     }
 
     private interface InventoryExclusions {
@@ -115,6 +115,12 @@ public abstract class Window  {
      * automatically cancelled unless manually un-cancelled
      */
     protected boolean cancelClicks = true;
+
+    /**
+     * Time to live in milliseconds
+     * use -1 for infinity
+     */
+    protected long TTL = 3 * 60 * 1000;
 
     protected Window(@NotNull Inventory inv) {
         this.inventory = inv;
