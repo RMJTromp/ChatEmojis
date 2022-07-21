@@ -1,18 +1,23 @@
 package com.rmjtromp.chatemojis.utils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Custom configuration files manager class.
@@ -54,7 +59,7 @@ public class Config extends YamlConfiguration {
                     URLConnection connection = url.openConnection();
                     connection.setUseCaches(false);
 
-                    try(OutputStream out = new FileOutputStream(file);
+                    try(OutputStream out = Files.newOutputStream(file.toPath());
                         InputStream in = connection.getInputStream()) {
                         byte[] buf = new byte[1024];
                         int len;
@@ -129,6 +134,95 @@ public class Config extends YamlConfiguration {
      */
     public void reload() throws IOException, InvalidConfigurationException {
         if(file.exists() || (!file.exists() && file.createNewFile())) load(file);
+    }
+
+    public ConfigurationReference<?> reference(@NotNull String key) {
+        return new ConfigurationReference<>(this, key);
+    }
+
+    public <T> ConfigurationReference<T> reference(@NotNull String key, @NotNull T defaultValue) {
+        return new ConfigurationReference<>(this, key, defaultValue);
+    }
+
+    public static final class ConfigurationReference<T> {
+
+        @Getter
+        private final Config config;
+        @Getter
+        private final String key;
+
+        private AtomicReference<T> valueReference = null;
+
+        private ConfigurationReference(@NonNull Config config, @NonNull String key) {
+            this.config = config;
+            this.key = key;
+        }
+
+        private ConfigurationReference(@NonNull Config config, @NonNull String key, @NonNull T defaultValue) {
+            this.config = config;
+            this.key = key;
+
+            if(!isSet()) setValue(defaultValue);
+        }
+
+        @Nullable
+        @SuppressWarnings("unchecked")
+        public T getValue() {
+            if(valueReference == null) {
+                valueReference = new AtomicReference<>();
+                try { valueReference.set((T) config.get(key)); }
+                catch(Exception e) {
+                    valueReference = null;
+                    throw new RuntimeException("Reference type and value type are not the same", e);
+                }
+            }
+            return valueReference.get();
+        }
+
+        /**
+         * @param value The new value
+         * @return The old value
+         */
+        @Nullable
+        public T setValue(T value) {
+            valueReference.set(value);
+            config.set(key, value);
+            config.save();
+            return valueReference != null ? valueReference.get() : null;
+        }
+
+        public boolean isSet() {
+            return config.isSet(key);
+        }
+
+        @Override
+        public String toString() {
+            return "ConfigurationReference{" +
+                "config=" + config +
+                ", key='" + key + '\'' +
+                ", valueReference=" + valueReference +
+                '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+
+            ConfigurationReference<?> that = (ConfigurationReference<?>) o;
+
+            if(!config.equals(that.config)) return false;
+            if(!key.equals(that.key)) return false;
+            return Objects.equals(valueReference, that.valueReference);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = config.hashCode();
+            result = 31 * result + key.hashCode();
+            result = 31 * result + (valueReference != null ? valueReference.hashCode() : 0);
+            return result;
+        }
     }
 
 }
