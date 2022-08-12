@@ -109,9 +109,9 @@ public final class ChatEmojis extends JavaPlugin {
         }, this);
 
         getCommand("emoji").setExecutor((sender, command, label, args) -> {
-            if(sender instanceof Player) {
-                if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
-                    if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
+            if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
+                if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
+                    if(sender instanceof Player) {
                         ComponentBuilder builder = new ComponentBuilder("&6ChatEmojis &7(v"+getDescription().getVersion()+")\n");
 
                         BaseComponent[] hoverMessage = new ComponentBuilder("&6ChatEmojis\n&7Version: &e"+getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page.").create();
@@ -136,37 +136,39 @@ public final class ChatEmojis extends JavaPlugin {
 
                             player.spigot().sendMessage(builder.create());
                         }
-                    } else if(args.length == 1) {
-                    	if(args[0].equalsIgnoreCase("help")) {
-                    		List<String> lines = new ArrayList<>();
-                    		lines.add("&6ChatEmojis &7- &fList of Commands");
-                    		lines.add("&e/emoji [list] &e- &7Shows a list of all emojis");
-                    		lines.add("&e/emoji help &e- &7Shows this list of commands");
-                    		lines.add("&e/emoji reload &e- &7Reloads all emojis");
-                    		lines.add("&e/emoji version &e- &7Shows the plugin version");
-                    		lines.add("&e/emoji settings &e- &7Toggle plugin settings");
+                    } else sender.sendMessage(ChatColor.RED + "Emojis are only available to players.");
+                } else if(args.length == 1) {
+                    if(args[0].equalsIgnoreCase("help")) {
+                        List<String> lines = new ArrayList<>();
+                        lines.add("&6ChatEmojis &7- &fList of Commands");
+                        lines.add("&e/emoji [list] &e- &7Shows a list of all emojis");
+                        lines.add("&e/emoji help &e- &7Shows this list of commands");
+                        lines.add("&e/emoji reload &e- &7Reloads all emojis");
+                        lines.add("&e/emoji version &e- &7Shows the plugin version");
+                        lines.add("&e/emoji settings &e- &7Toggle plugin settings");
 
-                    		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.join("\n", lines)));
-                    	} else if(args[0].equalsIgnoreCase("reload")) {
-                    		if(sender.hasPermission("chatemojis.reload")) {
-                        		long start = System.currentTimeMillis();
-                        		try {
-                        			reloadConfig();
-                                    emojis = EmojiGroup.init(getConfig());
-                                } catch (ConfigException e) {
-                                    e.printStackTrace();
-                                }
-                        		long interval = System.currentTimeMillis() - start;
-                        		sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+Long.toString(interval)+"ms)"));
-                    		} else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-                    	} else if(args[0].equalsIgnoreCase("settings")) {
-                    		if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsWindow.getInventory());
-                    		else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-                    	} else if(args[0].toLowerCase().matches("^v(?:er(?:sion)?)?$")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7This server is currently running &eChatEmojis &7(v"+getDescription().getVersion()+")"));
-                    	else sender.sendMessage(ChatColor.RED + "Unknown argument. Try \"/emoji help\" for a list of commands.");
-                    } else sender.sendMessage(ChatColor.RED + "Too many arguments. Try \"/emoji help\" for a list of commands.");
-                } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-            } else sender.sendMessage(ChatColor.RED + "Emojis are only available to players.");
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.join("\n", lines)));
+                    } else if(args[0].equalsIgnoreCase("reload")) {
+                        if(sender.hasPermission("chatemojis.reload")) {
+                            long start = System.currentTimeMillis();
+                            try {
+                                reloadConfig();
+                                emojis = EmojiGroup.init(getConfig());
+                            } catch (ConfigException e) {
+                                e.printStackTrace();
+                            }
+                            long interval = System.currentTimeMillis() - start;
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+Long.toString(interval)+"ms)"));
+                        } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
+                    } else if(args[0].equalsIgnoreCase("settings")) {
+                        if(sender instanceof Player) {
+                            if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsWindow.getInventory());
+                            else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
+                        } else sender.sendMessage(ChatColor.RED + "Emojis are only available to players.");
+                    } else if(args[0].toLowerCase().matches("^v(?:er(?:sion)?)?$")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7This server is currently running &eChatEmojis &7(v"+getDescription().getVersion()+")"));
+                    else sender.sendMessage(ChatColor.RED + "Unknown argument. Try \"/emoji help\" for a list of commands.");
+                } else sender.sendMessage(ChatColor.RED + "Too many arguments. Try \"/emoji help\" for a list of commands.");
+            } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
             return true;
         });
     }
