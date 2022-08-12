@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.rmjtromp.chatemojis.ChatEmojis
 api-version: 1.13
 authors: [ RMJTromp ]
-soft-depend: [ PlaceholderAPI ]
+soft-depend: [ PlaceholderAPI, Essentials ]
 
 commands:
   emoji:

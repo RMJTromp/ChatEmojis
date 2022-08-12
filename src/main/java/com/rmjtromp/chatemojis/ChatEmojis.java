@@ -14,14 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,9 +30,9 @@ public final class ChatEmojis extends JavaPlugin {
     static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^.]+?)$", Pattern.CASE_INSENSITIVE);
 
     private final Config config;
-    private EmojiGroup emojis = null;
+    EmojiGroup emojis = null;
     private static ChatEmojis plugin;
-    private boolean papiIsLoaded = false;
+    boolean papiIsLoaded = false;
     public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
     private SettingsWindow settingsWindow = null;
 
@@ -68,45 +60,7 @@ public final class ChatEmojis extends JavaPlugin {
         settingsWindow = new SettingsWindow(this);
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 
-        getServer().getPluginManager().registerEvents(new Listener() {
-
-            @EventHandler
-            public void onPlayerChat(AsyncPlayerChatEvent e) {
-                String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
-                e.setMessage(emojis.parse(e.getPlayer(), resetColor, e.getMessage(), false));
-            }
-            
-            @EventHandler
-            public void onPluginEnable(PluginEnableEvent e) {
-            	if(e.getPlugin().getName().equals("PlaceholderAPI")) papiIsLoaded = true;
-            }
-            
-            @EventHandler
-            public void onPluginDisable(PluginDisableEvent e) {
-            	if(e.getPlugin().getName().equals("PlaceholderAPI")) papiIsLoaded = false;
-            }
-            
-            @EventHandler
-            public void onSignChange(SignChangeEvent e) {
-            	if(Boolean.TRUE.equals(useOnSigns.getValue())) {
-                	for(int i = 0; i < e.getLines().length; i++) {
-                		e.setLine(i, emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i), false));
-                	}
-            	}
-            }
-            
-            @EventHandler
-            public void onPlayerBookEdit(PlayerEditBookEvent e) {
-            	if(Boolean.TRUE.equals(useInBooks.getValue())) {
-                	List<String> newContent = new ArrayList<>();
-                	BookMeta meta = e.getNewBookMeta();
-                	meta.getPages().forEach(string -> newContent.add(emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(string), string, false)));
-                	meta.setPages(newContent);
-                	e.setNewBookMeta(meta);
-            	}
-            }
-
-        }, this);
+        getServer().getPluginManager().registerEvents(new PluginListeners(), this);
 
         getCommand("emoji").setExecutor((sender, command, label, args) -> {
             if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
@@ -177,10 +131,6 @@ public final class ChatEmojis extends JavaPlugin {
     @Override
     public Config getConfig() {
         return config;
-    }
-
-    boolean isPapiLoaded() {
-    	return papiIsLoaded;
     }
 
     static ChatEmojis getInstance() {
