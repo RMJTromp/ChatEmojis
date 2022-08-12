@@ -68,45 +68,7 @@ public final class ChatEmojis extends JavaPlugin {
         settingsWindow = new SettingsWindow(this);
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 
-        getServer().getPluginManager().registerEvents(new Listener() {
-
-            @EventHandler
-            public void onPlayerChat(AsyncPlayerChatEvent e) {
-                String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
-                e.setMessage(emojis.parse(e.getPlayer(), resetColor, e.getMessage(), false));
-            }
-            
-            @EventHandler
-            public void onPluginEnable(PluginEnableEvent e) {
-            	if(e.getPlugin().getName().equals("PlaceholderAPI")) papiIsLoaded = true;
-            }
-            
-            @EventHandler
-            public void onPluginDisable(PluginDisableEvent e) {
-            	if(e.getPlugin().getName().equals("PlaceholderAPI")) papiIsLoaded = false;
-            }
-            
-            @EventHandler
-            public void onSignChange(SignChangeEvent e) {
-            	if(Boolean.TRUE.equals(useOnSigns.getValue())) {
-                	for(int i = 0; i < e.getLines().length; i++) {
-                		e.setLine(i, emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(e.getLine(i)), e.getLine(i), false));
-                	}
-            	}
-            }
-            
-            @EventHandler
-            public void onPlayerBookEdit(PlayerEditBookEvent e) {
-            	if(Boolean.TRUE.equals(useInBooks.getValue())) {
-                	List<String> newContent = new ArrayList<>();
-                	BookMeta meta = e.getNewBookMeta();
-                	meta.getPages().forEach(string -> newContent.add(emojis.parse(e.getPlayer(), ChatColor.RESET + ChatColor.getLastColors(string), string, false)));
-                	meta.setPages(newContent);
-                	e.setNewBookMeta(meta);
-            	}
-            }
-
-        }, this);
+        getServer().getPluginManager().registerEvents(new PluginListeners(), this);
 
         getCommand("emoji").setExecutor((sender, command, label, args) -> {
             if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
