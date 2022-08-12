@@ -33,7 +33,7 @@ public final class ChatEmojis extends JavaPlugin {
     EmojiGroup emojis = null;
     private static ChatEmojis plugin;
     boolean papiIsLoaded = false;
-    final ConfigurationReference<Boolean> useOnSigns, useInBooks;
+    public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
     private SettingsWindow settingsWindow = null;
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
