@@ -28,8 +28,9 @@ Grouped emojis permission needs to include the path to the group (ex. `chatemoji
 If you still don't understand how to get emoji-specific permission- as a server operator you're able to hover over the emoji (in the `/emoji` list) to view the permission node for that specific emoji.
 
 # Dependencies
-ChatEmojis does not hard-depend on any other plugins.
-**PlaceholderAPI** is a soft-dependency which means it's **NOT** required for ChatEmojis to work. If you'd like to use placeholders in your emojis, you're able to do so by also installing PlaceholderAPI.
+ChatEmojis does not hard-depend on any other plugins; Meaning **none** of these dependencies are required for ChatEmojis to work.
+- **[PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)** is used for placeholder parsing.
+- **[EssentialsX](https://www.spigotmc.org/resources/essentialsx.9089/)** is used for parsing emoticons in direct messages.
 
 Please note that if you are using PlaceholderAPI, you must also install the PlaceholderAPI Extension corresponding to the placeholder you're trying to access, more about this can be found [here](https://github.com/PlaceholderAPI/PlaceholderAPI/wiki/Placeholders).
 
