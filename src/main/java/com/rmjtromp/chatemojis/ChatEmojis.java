@@ -179,10 +179,6 @@ public final class ChatEmojis extends JavaPlugin {
         return config;
     }
 
-    boolean isPapiLoaded() {
-    	return papiIsLoaded;
-    }
-
     static ChatEmojis getInstance() {
         return plugin;
     }

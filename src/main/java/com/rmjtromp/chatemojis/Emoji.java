@@ -194,9 +194,9 @@ class Emoji {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
                 if(getEmojis().size() > 1) {
-                    message = matcher.replaceFirst(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                    message = matcher.replaceFirst(ChatColor.RESET + (!plugin.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
                     matcher = getPattern().matcher(message);
-                } else message = matcher.replaceAll(ChatColor.RESET + (!plugin.isPapiLoaded() ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                } else message = matcher.replaceAll(ChatColor.RESET + (!plugin.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
             }
         }
         return message;
