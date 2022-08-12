@@ -27,7 +27,7 @@ class PluginListeners implements Listener {
         public void onPrivateMessagePreSend(PrivateMessagePreSendEvent e) {
             if(e.getSender() instanceof User) {
                 Player sender = ((User) e.getSender()).getBase();
-                String resetColor = ChatColor.getLastColors(e.getMessage());
+                String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
                 e.setMessage(PLUGIN.emojis.parse(sender, resetColor, e.getMessage(), false));
             }
         }
