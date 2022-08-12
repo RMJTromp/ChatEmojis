@@ -14,14 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,10 +30,10 @@ public final class ChatEmojis extends JavaPlugin {
     static final Pattern NAME_PATTERN = Pattern.compile("(?<=\\.)?([^.]+?)$", Pattern.CASE_INSENSITIVE);
 
     private final Config config;
-    private EmojiGroup emojis = null;
+    EmojiGroup emojis = null;
     private static ChatEmojis plugin;
-    private boolean papiIsLoaded = false;
-    public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
+    boolean papiIsLoaded = false;
+    final ConfigurationReference<Boolean> useOnSigns, useInBooks;
     private SettingsWindow settingsWindow = null;
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
