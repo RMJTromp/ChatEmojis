@@ -1,6 +1,7 @@
 package com.rmjtromp.chatemojis;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import com.rmjtromp.chatemojis.utils.BukkitUtils;
 import com.rmjtromp.chatemojis.utils.ComponentBuilder;
 import com.rmjtromp.chatemojis.utils.Version;
 import lombok.Getter;
@@ -29,6 +30,7 @@ class CommandHandler implements CommandExecutor, TabCompleter {
     private static final String help_message = ChatColor.translateAlternateColorCodes('&', String.join("\n", Arrays.asList(
         "&6ChatEmojis &7- &fList of Commands",
         "&e/emoji [list] &e- &7Shows a list of all emojis",
+        "&e/emoji dump &e- &7Dump relevant debugging information",
         "&e/emoji help &e- &7Shows this list of commands",
         "&e/emoji reload &e- &7Reloads all emojis",
         "&e/emoji version &e- &7Shows the plugin version",
@@ -69,13 +71,30 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                 } else sender.sendMessage(help_message);
             } else if(args.length == 1) {
                 if(args[0].equalsIgnoreCase("help")) sender.sendMessage(help_message);
-                else if(args[0].equalsIgnoreCase("reload")) {
+                else if(args[0].equalsIgnoreCase("dump")) {
+                    if(sender.hasPermission("chatemojis.admin")) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7" + String.join("\n&7", Arrays.asList(
+                                "&6ChatEmojis &7- &fDump",
+                                "Versions;",
+                                "  Server: &e"+ BukkitUtils.getServerVersion().replaceAll("_", ".") + " (" + Version.getServerVersion() + ")",
+                                "  Plugin: &e"+PLUGIN.getDescription().getVersion(),
+                                "Settings;",
+                                "  Sign Manipulation: &e"+PLUGIN.useOnSigns.getNonNullValue(),
+                                "  Book Manipulation: &e"+PLUGIN.useInBooks.getNonNullValue(),
+                                "  Max Duplicates: &e"+PLUGIN.maxDuplicateEmojis.getNonNullValue(),
+                                "  Max Emojis: &e"+PLUGIN.maxEmojisPerMessage.getNonNullValue(),
+                                "Dependencies;",
+                                "  PlaceholderAPI: &e"+PLUGIN.papiIsLoaded,
+                                "Emojis Loaded: &e"+PLUGIN.emojis.getEmojis(true).size()
+                        ))));
+                    } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
+                } else if(args[0].equalsIgnoreCase("reload")) {
                     if(sender.hasPermission("chatemojis.reload")) {
                         long start = System.currentTimeMillis();
                         try {
-                            PLUGIN.reloadConfig();
+                            PLUGIN.getConfig().reload();
                             PLUGIN.emojis = EmojiGroup.init(PLUGIN.getConfig());
-                        } catch (ConfigException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         long interval = System.currentTimeMillis() - start;
