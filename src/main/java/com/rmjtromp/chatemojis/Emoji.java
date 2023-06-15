@@ -34,7 +34,7 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class Emoji {
+public class Emoji {
 
     private static final Pattern REGEX_PATTERN = Pattern.compile("^/(.+)/(i)?$", Pattern.CASE_INSENSITIVE);
     private static final ChatEmojis PLUGIN = ChatEmojis.getInstance();
@@ -186,7 +186,7 @@ class Emoji {
     public ParsingContext parse(@NonNull ParsingContext ctx) {
         if(!isEnabled()) return ctx;
         if(!ctx.getPlayer().hasPermission(getPermission()) && !ctx.isForced()) return ctx;
-        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
+//        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
 
         Matcher matcher = getPattern().matcher(ctx.getMessage());
         while(matcher.find()) {
@@ -199,7 +199,7 @@ class Emoji {
                 ctx.setMessage(matcher.replaceAll(replacement));
 
             ctx.getUseMap().compute(this, (k, v) -> v == null ? 1 : v + 1);
-            if((ctx.hasReachedLimit(this) || ctx.hasReachedGlobalLimit()) && !ctx.isForced()) break;
+//            if((ctx.hasReachedLimit(this) || ctx.hasReachedGlobalLimit()) && !ctx.isForced()) break;
         }
 
         return ctx;
