@@ -2,8 +2,6 @@ package com.rmjtromp.chatemojis;
 
 import com.earth2me.essentials.User;
 import net.ess3.api.events.PrivateMessagePreSendEvent;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -26,9 +24,11 @@ class PluginListeners implements Listener {
         @EventHandler(ignoreCancelled = true)
         public void onPrivateMessagePreSend(PrivateMessagePreSendEvent e) {
             if(e.getSender() instanceof User) {
-                Player sender = ((User) e.getSender()).getBase();
-                String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
-                e.setMessage(PLUGIN.emojis.parse(sender, resetColor, e.getMessage(), false));
+                e.setMessage(PLUGIN.emojis.parse(ParsingContext.builder()
+                    .player(((User) e.getSender()).getBase())
+                    .message(e.getMessage())
+                    .build()
+                ).getMessage());
             }
         }
 
@@ -36,8 +36,11 @@ class PluginListeners implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-        String resetColor = ChatColor.RESET + ChatColor.getLastColors(e.getMessage());
-        e.setMessage(PLUGIN.emojis.parse(e.getPlayer(), resetColor, e.getMessage(), false));
+        e.setMessage(PLUGIN.emojis.parse(ParsingContext.builder()
+            .player(e.getPlayer())
+            .message(e.getMessage())
+            .build()
+        ).getMessage());
     }
 
     @EventHandler
@@ -66,25 +69,29 @@ class PluginListeners implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onSignChange(SignChangeEvent e) {
-        if(Boolean.TRUE.equals(PLUGIN.useOnSigns.getValue())) {
+        if(PLUGIN.useOnSigns.getNonNullValue()) {
             for(int i = 0; i < e.getLines().length; i++) {
                 String line = e.getLine(i);
                 assert line != null;
-                String resetColor = ChatColor.RESET + ChatColor.getLastColors(line);
-                e.setLine(i, PLUGIN.emojis.parse(e.getPlayer(), resetColor, line, false));
+                e.setLine(i, PLUGIN.emojis.parse(ParsingContext.builder()
+                    .player(e.getPlayer())
+                    .message(e.getLine(i))
+                    .build()
+                ).getMessage());
             }
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerBookEdit(PlayerEditBookEvent e) {
-        if(Boolean.TRUE.equals(PLUGIN.useInBooks.getValue())) {
+        if(PLUGIN.useInBooks.getNonNullValue()) {
             List<String> newContent = new ArrayList<>();
             BookMeta meta = e.getNewBookMeta();
-            meta.getPages().forEach(string -> {
-                String resetColor = ChatColor.RESET + ChatColor.getLastColors(string);
-                newContent.add(PLUGIN.emojis.parse(e.getPlayer(), resetColor, string, false));
-            });
+            meta.getPages().forEach(string -> newContent.add(PLUGIN.emojis.parse(ParsingContext.builder()
+                .player(e.getPlayer())
+                .message(string)
+                .build()
+            ).getMessage()));
             meta.setPages(newContent);
             e.setNewBookMeta(meta);
         }

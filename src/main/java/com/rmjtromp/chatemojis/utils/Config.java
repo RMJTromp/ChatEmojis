@@ -151,17 +151,19 @@ public class Config extends YamlConfiguration {
         private final Config config;
         @Getter
         private final String key;
-
-        private AtomicReference<T> valueReference = null;
+        @Nullable
+        private final AtomicReference<T> defaultValue;
 
         private ConfigurationReference(@NonNull Config config, @NonNull String key) {
             this.config = config;
             this.key = key;
+            this.defaultValue = null;
         }
 
         private ConfigurationReference(@NonNull Config config, @NonNull String key, @NonNull T defaultValue) {
             this.config = config;
             this.key = key;
+            this.defaultValue = new AtomicReference<>(defaultValue);
 
             if(!isSet()) setValue(defaultValue);
         }
@@ -169,15 +171,17 @@ public class Config extends YamlConfiguration {
         @Nullable
         @SuppressWarnings("unchecked")
         public T getValue() {
-            if(valueReference == null) {
-                valueReference = new AtomicReference<>();
-                try { valueReference.set((T) config.get(key)); }
-                catch(Exception e) {
-                    valueReference = null;
-                    throw new RuntimeException("Reference type and value type are not the same", e);
-                }
-            }
-            return valueReference.get();
+            return (T) this.config.get(key, getDefaultValue());
+        }
+
+        @NotNull
+        public T getNonNullValue() {
+            return Objects.requireNonNull(getValue());
+        }
+
+        @Nullable
+        public T getDefaultValue() {
+            return defaultValue != null ? defaultValue.get() : null;
         }
 
         /**
@@ -186,11 +190,10 @@ public class Config extends YamlConfiguration {
          */
         @Nullable
         public T setValue(T value) {
-            if(valueReference == null) valueReference = new AtomicReference<>();
-            valueReference.set(value);
+            T oldValue = getValue();
             config.set(key, value);
             config.save();
-            return valueReference != null ? valueReference.get() : null;
+            return oldValue;
         }
 
         public boolean isSet() {
@@ -202,7 +205,7 @@ public class Config extends YamlConfiguration {
             return "ConfigurationReference{" +
                 "config=" + config +
                 ", key='" + key + '\'' +
-                ", valueReference=" + valueReference +
+                ", value=" + getValue() +
                 '}';
         }
 
@@ -215,14 +218,14 @@ public class Config extends YamlConfiguration {
 
             if(!config.equals(that.config)) return false;
             if(!key.equals(that.key)) return false;
-            return Objects.equals(valueReference, that.valueReference);
+            return Objects.equals(defaultValue, that.defaultValue);
         }
 
         @Override
         public int hashCode() {
             int result = config.hashCode();
             result = 31 * result + key.hashCode();
-            result = 31 * result + (valueReference != null ? valueReference.hashCode() : 0);
+            result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
             return result;
         }
     }

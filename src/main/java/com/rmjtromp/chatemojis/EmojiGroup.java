@@ -1,6 +1,7 @@
 package com.rmjtromp.chatemojis;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import lombok.NonNull;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.ConfigurationSection;
@@ -86,6 +87,21 @@ class EmojiGroup {
         return emojis;
     }
 
+    public ParsingContext parse(@NonNull ParsingContext ctx) {
+        for(EmojiGroup group : getGroups()) {
+            group.parse(ctx);
+            if(ctx.hasReachedGlobalLimit()) return ctx;
+        }
+
+        for(Emoji emoji : getEmojis()) {
+            emoji.parse(ctx);
+            if(ctx.hasReachedGlobalLimit()) return ctx;
+        }
+
+        return ctx;
+    }
+
+    @Deprecated
     public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
         for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message, forced);
         for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message, forced);

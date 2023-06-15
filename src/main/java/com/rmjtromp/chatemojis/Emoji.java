@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 import com.rmjtromp.chatemojis.utils.BukkitUtils;
 import com.rmjtromp.chatemojis.utils.ComponentBuilder;
 import com.rmjtromp.chatemojis.utils.Version;
+import lombok.Getter;
+import lombok.NonNull;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.ChatColor;
@@ -28,30 +30,31 @@ import com.rmjtromp.chatemojis.exceptions.InvalidRegexException;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class Emoji {
 
     private static final Pattern REGEX_PATTERN = Pattern.compile("^/(.+)/(i)?$", Pattern.CASE_INSENSITIVE);
-    private static final ChatEmojis plugin = ChatEmojis.getInstance();
+    private static final ChatEmojis PLUGIN = ChatEmojis.getInstance();
 
-    private final String name;
-    private final EmojiGroup parent;
-    private final Permission permission;
-    private final List<String> emoticons = new ArrayList<>();
-    private final Pattern pattern;
-    private final List<String> emojis = new ArrayList<>();
-    private boolean enabled = true;
+    @Getter private final String name;
+    @Getter private final EmojiGroup parent;
+    @Getter private final Permission permission;
+    @Nullable private final Integer limit;
+    @Getter private final List<String> emoticons = new ArrayList<>();
+    @Getter private final Pattern pattern;
+    @Getter private final List<String> emojis = new ArrayList<>();
+    @Getter private boolean enabled = true;
 
     static Emoji init(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
         return new Emoji(Objects.requireNonNull(parent), Objects.requireNonNull(section));
     }
 
-    private Emoji(EmojiGroup parent, ConfigurationSection section) throws ConfigException {
+    private Emoji(@NonNull EmojiGroup parent, @NonNull ConfigurationSection section) throws ConfigException {
         this.parent = parent;
-        Matcher matcher = NAME_PATTERN.matcher(section.getCurrentPath());
+        Matcher matcher = NAME_PATTERN.matcher(Objects.requireNonNull(section.getCurrentPath()));
         if(matcher.find()) {
             name = matcher.group(1).replaceAll("[_\\s]", "-").replaceAll("[^0-9a-zA-Z-]", "");
             if(name.isEmpty()) throw new ConfigException("Emoji name can not be empty", section);
@@ -60,16 +63,25 @@ class Emoji {
         permission.setDefault(PermissionDefault.OP);
         permission.setDescription(String.format("Permission to use '%s' emoji", name));
         permission.addParent(parent.getPermission(), true);
+
+        Object limit = section.get("limit", null);
+        Integer intLimit = null;
+        if(limit instanceof Number) {
+            intLimit = ((Number) limit).intValue();
+            if(intLimit < -1) intLimit = -1;
+        }
+        this.limit = intLimit;
         
         boolean emoticonFound = false;
         for(String key : section.getKeys(false)) {
             if(key.toLowerCase().matches("^emoticons?$")) {
                 if(section.isString(key) || section.isInt(key)) {
                     String emoticon = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
+                    assert emoticon != null;
                     if(!emoticon.isEmpty()) emoticons.add(emoticon);
                     else throw new InvalidEmoticonException("Emoticon can not be empty", section);
                 } else if(section.isList(key)) {
-                    for(Object obj : section.getList(key)) {
+                    for(Object obj : Objects.requireNonNull(section.getList(key))) {
                         String emoticon;
                         if(obj instanceof String) emoticon = (String) obj;
                         else if(obj instanceof Integer) emoticon = Integer.toString((Integer) obj);
@@ -92,6 +104,7 @@ class Emoji {
             if(key.equalsIgnoreCase("regex")) {
                 if(section.isString(key)) {
                     String value = section.getString(key);
+                    assert value != null;
                     Matcher m = REGEX_PATTERN.matcher(value);
                     if(m.matches()) {
                         pattern = m.group(2) != null ? Pattern.compile(m.group(1), Pattern.CASE_INSENSITIVE) : Pattern.compile(m.group(1));
@@ -110,10 +123,11 @@ class Emoji {
             if(key.toLowerCase().matches("^emojis?$")) {
                 if(section.isString(key) || section.isInt(key)) {
                     String emoji = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
+                    assert emoji != null;
                     if(!emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
                     else throw new InvalidEmojiException("Emoji can not be empty", section);
                 } else if(section.isList(key)) {
-                    for(Object obj : section.getList(key)) {
+                    for(Object obj : Objects.requireNonNull(section.getList(key))) {
                         String emoji;
                         if(obj instanceof String) emoji = (String) obj;
                         else if(obj instanceof Integer) emoji = Integer.toString((Integer) obj);
@@ -148,29 +162,9 @@ class Emoji {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public List<String> getEmoticons() {
-        return new ArrayList<>(emoticons);
-    }
-
-    public List<String> getEmojis() {
-        return new ArrayList<>(emojis);
-    }
-
     private static final Random random = new Random();
     public String getEmoji() {
         return getEmojis().size() > 1 ? getEmojis().get(random.nextInt(getEmojis().size())) : getEmojis().get(0);
-    }
-
-    public Pattern getPattern() {
-        return pattern;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
     }
     
     public void enable() {
@@ -181,22 +175,45 @@ class Emoji {
     	enabled = false;
     }
 
-    public Permission getPermission() {
-        return permission;
+    public int getLimit() {
+    	return limit != null ? limit : PLUGIN.maxDuplicateEmojis.getNonNullValue();
     }
 
-    public EmojiGroup getParent() {
-        return parent;
+    public boolean hasLimit() {
+        return getLimit() != -1;
     }
 
+    public ParsingContext parse(@NonNull ParsingContext ctx) {
+        if(!isEnabled()) return ctx;
+        if(!ctx.getPlayer().hasPermission(getPermission()) && !ctx.isForced()) return ctx;
+        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
+
+        Matcher matcher = getPattern().matcher(ctx.getMessage());
+        while(matcher.find()) {
+            final String replacement = ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(ctx.getPlayer(), getEmoji())) + ctx.getResetColor();
+
+            if(getEmojis().size() > 1) {
+                ctx.setMessage(matcher.replaceFirst(replacement));
+                matcher = getPattern().matcher(ctx.getMessage());
+            } else
+                ctx.setMessage(matcher.replaceAll(replacement));
+
+            ctx.getUseMap().compute(this, (k, v) -> v == null ? 1 : v + 1);
+            if((ctx.hasReachedLimit(this) || ctx.hasReachedGlobalLimit()) && !ctx.isForced()) break;
+        }
+
+        return ctx;
+    }
+
+    @Deprecated
     public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
         if(isEnabled() && (forced || player.hasPermission(getPermission()))) {
             Matcher matcher = getPattern().matcher(message);
             while(matcher.find()) {
                 if(getEmojis().size() > 1) {
-                    message = matcher.replaceFirst(ChatColor.RESET + (!plugin.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                    message = matcher.replaceFirst(ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
                     matcher = getPattern().matcher(message);
-                } else message = matcher.replaceAll(ChatColor.RESET + (!plugin.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
+                } else message = matcher.replaceAll(ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
             }
         }
         return message;

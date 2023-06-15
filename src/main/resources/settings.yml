@@ -1,0 +1,74 @@
+# ChatEmojis
+# Execute `/emojis edit` to open config web-editor
+# More info at: https://github.com/RMJTromp/ChatEmojis
+
+# Config Version
+# Do NOT change this value, this is for the plugin
+# and web-editor to keep track of what version the config is
+config-version: 1
+
+# Update Checker
+# Whether the plugin should automatically check for updates
+# when server is started.
+update-checker: true
+
+# Settings
+settings:
+  # Emoji usage
+  # Define whether emojis can be used in chat, books, and signs
+  # globally and per-world
+  use:
+    # Global usage settings
+    # These settings are automatically inherited on all worlds
+    # unless defined otherwise under the world settings
+    global:
+      chat: true # Whether players are able to use emojis in chat
+      signs: true # Whether players are able to use emojis on signs
+      books: true # Whether players are able to use emojis in books
+    worlds:
+      example-world: # World name
+        # chat: true # (Not really needed, because it already inherits the global setting)
+        signs: false
+        books: false
+
+  # Emoji limitations
+  # The max amount of emojis a player is allowed to use in different situations
+  # For unlimited use, set to -1
+  # Distinct emojis is how many times a unique emoji can be used in one situation
+  limitations:
+    # Whether limitations are enabled
+    enabled: true
+    chat:
+      max-per-message: 5
+      max-distinct-emojis: 3
+    books:
+      max-per-book: 12
+      max-distinct-emojis: 5
+    signs:
+      max-per-sign: 4
+      max-distinct-emojis: 2
+
+  # Plugin appearance
+  # Manage how you want the players to see the plugin
+  appearance:
+    # The colors to use
+    # Supported values:
+    # - Hex codes (https://www.google.com/search?q=hex+color+picker)
+    # - Minecraft color codes (https://htmlcolorcodes.com/minecraft-color-codes/)
+    # - Spigot color enums (https://hub.spigotmc.org/javadocs/spigot/org/bukkit/ChatColor.html)
+    colors:
+      primary: 'YELLOW'
+      secondary: 'GOLD'
+      tertiary: 'GRAY'
+      quaternary: 'DARK_GRAY'
+
+    # Branding settings
+    # (Seen when executing `/emojis help`)
+    # NOTE: This will not remove credits to the author when hovering over branding
+    branding:
+      name: ChatEmojis
+      display-version: true
+
+    # Plugin Language
+    # See supported languages on github (https://github.com/RMJTromp/ChatEmojis)
+    language: EN-US
