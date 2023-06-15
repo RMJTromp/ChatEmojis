@@ -17,16 +17,6 @@
       <option name="url" value="https://oss.sonatype.org/content/groups/public/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="ess-repo" />
-      <option name="name" value="ess-repo" />
-      <option name="url" value="https://ci.ender.zone/plugin/repository/everything/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="minebench-repo" />
-      <option name="name" value="minebench-repo" />
-      <option name="url" value="https://repo.minebench.de/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="spigotmc-repo" />
       <option name="name" value="spigotmc-repo" />
       <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
