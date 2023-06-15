@@ -24,18 +24,17 @@ public enum Version {
     V1_18,
     V1_19,
     V1_20,
-    UNSUPPORTED;
+    UNSUPPORTED("Unsupported");
 
     private static Version serverVersion = null;
     private final String string;
 
-    // constructor
     Version() {
         string = super.toString().substring(1).replace("_", ".");
     }
 
-    Version(String string) {
-        this.string = string;
+    Version(String str) {
+        string = str;
     }
 
     /**
