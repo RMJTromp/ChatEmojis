@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import static com.rmjtromp.chatemojis.ChatEmojis.NAME_PATTERN;
 import static com.rmjtromp.chatemojis.ChatEmojis.RESERVED_NAMES;
 
-class EmojiGroup {
+public class EmojiGroup {
 
     private final ArrayList<Emoji> emojis = new  ArrayList<>();
     private final ArrayList<EmojiGroup> groups = new ArrayList<>();
@@ -84,6 +84,21 @@ class EmojiGroup {
     }
 
     public ArrayList<Emoji> getEmojis() {
+        return getEmojis(false);
+    }
+
+    /**
+     * Get all emojis recursively
+     * @param recursively Whether to get emojis recursively
+     * @return All emojis
+     */
+    public ArrayList<Emoji> getEmojis(boolean recursively) {
+        ArrayList<Emoji> emojis = new ArrayList<>(this.emojis);
+
+        if(recursively) {
+            for(EmojiGroup group : getGroups()) emojis.addAll(group.getEmojis(true));
+        }
+
         return emojis;
     }
 
