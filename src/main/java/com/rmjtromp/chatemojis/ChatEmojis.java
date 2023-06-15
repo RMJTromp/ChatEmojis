@@ -41,8 +41,10 @@ public final class ChatEmojis extends JavaPlugin {
 
         useInBooks = config.reference("settings.use.books", true);
         useOnSigns = config.reference("settings.use.signs", true);
-        maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", 5);
-        maxDuplicateEmojis = config.reference("settings.max-duplicate-emojis", 3);
+
+        // disabled until stable & working
+        maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", -1);
+        maxDuplicateEmojis = config.reference("settings.max-duplicate-emojis", -1);
     }
 
     @Override
@@ -100,10 +102,10 @@ public final class ChatEmojis extends JavaPlugin {
     public String parseEmojis(@NonNull Player player, @NonNull String message, boolean force) {
         return emojis.parse(
                 ParsingContext.builder()
-                        .player(player)
-                        .message(message)
-                        .forced(force)
-                        .build()
+                    .player(player)
+                    .message(message)
+                    .forced(force)
+                    .build()
                 ).getMessage();
     }
 
