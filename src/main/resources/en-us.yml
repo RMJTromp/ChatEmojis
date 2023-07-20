@@ -1,0 +1,5 @@
+commands:
+  help:
+    name: help
+    aliases: ['?']
+    description: 'Shows this list commands'

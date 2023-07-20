@@ -1,6 +1,5 @@
 package com.rmjtromp.chatemojis.utils;
 
-import com.rmjtromp.chatemojis.exceptions.UnsupportedVersionException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -23,14 +22,24 @@ public enum Version {
     V1_16,
     V1_17,
     V1_18,
-    V1_19;
+    V1_19,
+    V1_20,
+    UNSUPPORTED("Unsupported");
 
     private static Version serverVersion = null;
+    private final String string;
+
+    Version() {
+        string = super.toString().substring(1).replace("_", ".");
+    }
+
+    Version(String str) {
+        string = str;
+    }
 
     /**
      * Returns the {@link Version} enumeration of the server version
      * @return The server's {@link Version}
-     * @throws UnsupportedVersionException Thrown if the server's version is not supported
      */
     public static Version getServerVersion() {
         if(serverVersion != null) return serverVersion;
@@ -38,7 +47,12 @@ public enum Version {
         for(Version version : Version.values()) {
             if(v.startsWith(version.toString().replace(".", "_"))) return (serverVersion = version);
         }
-        throw new UnsupportedVersionException("Server version not supported");
+
+        // get plugin logger and log unsupported version
+        BukkitUtils.getPlugin().getLogger().warning("Unsupported server version: " + v);
+        BukkitUtils.getPlugin().getLogger().warning("This server is running unsupported/untested version of Minecraft, and is considered 'run at own risk', with limited to no support.");
+
+        return (serverVersion = UNSUPPORTED);
     }
 
     /**
@@ -50,7 +64,7 @@ public enum Version {
     }
 
     /**
-     * Returns whether or not the version instance is older than
+     * Returns whether the version instance is older than
      * the parameter version.
      * @param version to compare to
      * @return Whether version is older
@@ -60,7 +74,7 @@ public enum Version {
     }
 
     /**
-     * Returns whether or not the version instance is newer than
+     * Returns whether the version instance is newer than
      * the parameter version.
      * @param version to compare to
      * @return Whether version is newer
@@ -76,7 +90,7 @@ public enum Version {
      */
     @Override
     public String toString() {
-        return super.toString().substring(1).replace("_", ".");
+        return string;
     }
 
 }
