@@ -42,8 +42,9 @@ class CommandHandler implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
-            if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
+            if(args.length == 0 || args.length <= 2 && args[0].equalsIgnoreCase("list")) {
                 if(sender instanceof Player) {
+
                     ComponentBuilder builder = new ComponentBuilder("&6ChatEmojis &7(v"+PLUGIN.getDescription().getVersion()+")\n");
 
                     BaseComponent[] hoverMessage = new ComponentBuilder("&6ChatEmojis\n&7Version: &e"+PLUGIN.getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page.").create();
@@ -61,11 +62,34 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                         PLUGIN.emojis.getComponents((Player) sender).forEach(baseComponents -> player.spigot().sendMessage(baseComponents));
                     } else {
                         List<BaseComponent[]> components = PLUGIN.emojis.getComponents((Player) sender);
-                        for(int i = 0; i < components.size(); i++) {
-                            builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
-                            if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
-                        }
 
+                        // Pages
+                        final int messagesPerPage = 20;
+                        int page = 0;
+                        if(args.length > 1) {
+                            try {
+                                page = Integer.parseInt(args[1]);
+                            }
+                            catch (NumberFormatException e) {} // Just defaults to page 0 if bad value is provided
+                        }
+                        if (page < 1) {
+                            page = 1;
+                        }
+                        final int lastPage = (components.size() - 1) / messagesPerPage + 1;
+                        if (page > lastPage) {
+                            page = lastPage;
+                        }
+                        final int pageEnd = page * messagesPerPage;
+                        final int pageStart = pageEnd - messagesPerPage;
+
+                        for(int i = pageStart; i < components.size() && i < pageEnd; i++) {
+                            builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
+                            if(i != components.size() - 1 && i != pageEnd - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                        }
+                        if (lastPage != 1) {
+                            builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                            builder.append(new ComponentBuilder("&ePage &6" + page + "&e of &6"  + lastPage + "&e, type /emojis list <page>").create());
+                        }
                         player.spigot().sendMessage(builder.create());
                     }
                 } else sender.sendMessage(help_message);
