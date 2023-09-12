@@ -29,7 +29,7 @@ class CommandHandler implements CommandExecutor, TabCompleter {
 
     private static final String help_message = ChatColor.translateAlternateColorCodes('&', String.join("\n", Arrays.asList(
         "&6ChatEmojis &7- &fList of Commands",
-        "&e/emoji [list] &e- &7Shows a list of all emojis",
+        "&e/emoji [list] [page] &e- &7Shows a list of all emojis",
         "&e/emoji dump &e- &7Dump relevant debugging information",
         "&e/emoji help &e- &7Shows this list of commands",
         "&e/emoji reload &e- &7Reloads all emojis",
