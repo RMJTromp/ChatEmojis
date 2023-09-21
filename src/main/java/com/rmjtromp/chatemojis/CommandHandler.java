@@ -1,11 +1,11 @@
 package com.rmjtromp.chatemojis;
 
-import com.rmjtromp.chatemojis.exceptions.ConfigException;
 import com.rmjtromp.chatemojis.utils.BukkitUtils;
 import com.rmjtromp.chatemojis.utils.ComponentBuilder;
 import com.rmjtromp.chatemojis.utils.Version;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
@@ -84,7 +84,61 @@ class CommandHandler implements CommandExecutor, TabCompleter {
 
                         if (lastPage != 1) {
                             builder.append("\n", ComponentBuilder.FormatRetention.NONE);
-                            builder.append(new ComponentBuilder("&ePage &6" + page + "&e of &6"  + lastPage + "&e, type /emojis list <page>").create());
+
+                            ComponentBuilder paginationBuilder = new ComponentBuilder();
+                            // left chevron
+                            {
+                                boolean firstPage = page == 1;
+                                ChatColor color = firstPage ? ChatColor.GRAY : ChatColor.GOLD;
+                                ComponentBuilder leftChevron = new ComponentBuilder(color + " «  ");
+
+                                if(!firstPage) {
+                                    BaseComponent[] previousPageHoverMessage = new ComponentBuilder(
+                                            String.format("§f/emoji list %s", page - 1)
+                                    ).create();
+
+                                    // new Text(BaseComponent[]) is not added until 1.16
+                                    HoverEvent previousPageHoverEvent;
+                                    if(Version.getServerVersion().isOlderThan(Version.V1_16)) previousPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, previousPageHoverMessage);
+                                    else previousPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(previousPageHoverMessage));
+                                    leftChevron.event(previousPageHoverEvent);
+
+                                    leftChevron.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/emoji list " + (page - 1)));
+                                }
+
+                                paginationBuilder.append(leftChevron.create(), ComponentBuilder.FormatRetention.NONE);
+                            }
+
+                            // pagination
+                            paginationBuilder.append(
+                                    String.format("§fPage §e%s§7/%s", page, lastPage),
+                                    ComponentBuilder.FormatRetention.NONE
+                            );
+
+                            {
+                                // right chevron
+                                boolean isLastPage = page == lastPage;
+                                ChatColor color = isLastPage ? ChatColor.GRAY : ChatColor.GOLD;
+                                ComponentBuilder rightChevron = new ComponentBuilder(color + "  » ");
+
+                                if(!isLastPage) {
+                                    BaseComponent[] nextPageHoverMessage = new ComponentBuilder(
+                                            String.format("§f/emoji list %s", page + 1)
+                                    ).create();
+
+                                    // new Text(BaseComponent[]) is not added until 1.16
+                                    HoverEvent nextPageHoverEvent;
+                                    if(Version.getServerVersion().isOlderThan(Version.V1_16)) nextPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, nextPageHoverMessage);
+                                    else nextPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(nextPageHoverMessage));
+                                    rightChevron.event(nextPageHoverEvent);
+
+                                    rightChevron.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/emoji list " + (page + 1)));
+                                }
+
+                                paginationBuilder.append(rightChevron.create(), ComponentBuilder.FormatRetention.NONE);
+                            }
+
+                            builder.append(paginationBuilder.create(), ComponentBuilder.FormatRetention.NONE);
                         }
                         player.spigot().sendMessage(builder.create());
                     }
