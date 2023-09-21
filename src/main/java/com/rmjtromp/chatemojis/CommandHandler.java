@@ -68,16 +68,12 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                         int page = 1;
                         if(args.length > 1) {
                             try {
-                                page = Integer.parseInt(args[1]);
+                                page = Math.max(1, Integer.parseInt(args[1]));
                             } catch (NumberFormatException ignored) {}
                         }
-                        if (page < 1) {
-                            page = 1;
-                        }
                         final int lastPage = (components.size() - 1) / messagesPerPage + 1;
-                        if (page > lastPage) {
-                            page = lastPage;
-                        }
+                        page = Math.min(page, lastPage);
+
                         final int pageEnd = page * messagesPerPage;
                         final int pageStart = pageEnd - messagesPerPage;
 
@@ -85,6 +81,7 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                             builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
                             if(i != components.size() - 1 && i != pageEnd - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
                         }
+
                         if (lastPage != 1) {
                             builder.append("\n", ComponentBuilder.FormatRetention.NONE);
                             builder.append(new ComponentBuilder("&ePage &6" + page + "&e of &6"  + lastPage + "&e, type /emojis list <page>").create());
