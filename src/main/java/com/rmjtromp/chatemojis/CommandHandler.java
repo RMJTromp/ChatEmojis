@@ -69,10 +69,7 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                         if(args.length > 1) {
                             try {
                                 page = Integer.parseInt(args[1]);
-                            }
-                            catch (NumberFormatException e) {
-                                page = 1; // default to page 1 on bad input
-                            }
+                            } catch (NumberFormatException ignored) {}
                         }
                         if (page < 1) {
                             page = 1;
