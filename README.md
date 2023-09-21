@@ -14,7 +14,7 @@ ChatEmojis allows you to add your own emojis in the config file and supports mul
 | `/emoji settings`      | Shows list of emojis | `chatemojis.admin` |
 
 # Permissions
-| Permission Node | Default | Description
+| Permission Node | Default | Description |
 | ------ | ------ | ------ |
 | chatemojis.list | Everyone | Allowes access to use /emoji [list] |
 | chatemojis.use.* | OP | Permission to use all emojis |
