@@ -2,16 +2,12 @@ package com.rmjtromp.chatemojis;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
 import com.rmjtromp.chatemojis.utils.BukkitUtils;
-import com.rmjtromp.chatemojis.utils.ComponentBuilder;
 import com.rmjtromp.chatemojis.utils.Config;
 import com.rmjtromp.chatemojis.utils.Config.ConfigurationReference;
-import com.rmjtromp.chatemojis.utils.Version;
 import com.rmjtromp.chatemojis.windows.SettingsWindow;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -34,7 +29,8 @@ public final class ChatEmojis extends JavaPlugin {
     private static ChatEmojis plugin;
     boolean papiIsLoaded = false;
     public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
-    private SettingsWindow settingsWindow = null;
+    public final ConfigurationReference<Integer> maxEmojisPerMessage, maxDuplicateEmojis;
+    SettingsWindow settingsWindow = null;
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
         plugin = this;
@@ -42,8 +38,13 @@ public final class ChatEmojis extends JavaPlugin {
         BukkitUtils.init(this);
 
         config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
+
         useInBooks = config.reference("settings.use.books", true);
         useOnSigns = config.reference("settings.use.signs", true);
+
+        // disabled until stable & working
+        maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", -1);
+        maxDuplicateEmojis = config.reference("settings.max-duplicate-emojis", -1);
     }
 
     @Override
@@ -62,69 +63,12 @@ public final class ChatEmojis extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PluginListeners(), this);
 
-        getCommand("emoji").setExecutor((sender, command, label, args) -> {
-            if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
-                if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
-                    if(sender instanceof Player) {
-                        ComponentBuilder builder = new ComponentBuilder("&6ChatEmojis &7(v"+getDescription().getVersion()+")\n");
+        CommandHandler commandHandler = new CommandHandler();
+        PluginCommand command = getCommand("emoji");
 
-                        BaseComponent[] hoverMessage = new ComponentBuilder("&6ChatEmojis\n&7Version: &e"+getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page.").create();
-
-                        // new Text(BaseComponent[]) is not added until 1.16
-                        HoverEvent hoverEvent;
-                        if(Version.getServerVersion().isOlderThan(Version.V1_16)) hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverMessage);
-                        else hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverMessage));
-                        builder.event(hoverEvent);
-
-                        Player player = (Player) sender;
-                        if(Version.getServerVersion().isOlderThan(Version.V1_8)) {
-                            // idk new-lines dont work on 1.7
-                            player.spigot().sendMessage(builder.create());
-                            emojis.getComponents((Player) sender).forEach(baseComponents -> player.spigot().sendMessage(baseComponents));
-                        } else {
-                            List<BaseComponent[]> components = emojis.getComponents((Player) sender);
-                            for(int i = 0; i < components.size(); i++) {
-                                builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
-                                if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
-                            }
-
-                            player.spigot().sendMessage(builder.create());
-                        }
-                    } else sender.sendMessage(ChatColor.RED + "Emojis are only available to players.");
-                } else if(args.length == 1) {
-                    if(args[0].equalsIgnoreCase("help")) {
-                        List<String> lines = new ArrayList<>();
-                        lines.add("&6ChatEmojis &7- &fList of Commands");
-                        lines.add("&e/emoji [list] &e- &7Shows a list of all emojis");
-                        lines.add("&e/emoji help &e- &7Shows this list of commands");
-                        lines.add("&e/emoji reload &e- &7Reloads all emojis");
-                        lines.add("&e/emoji version &e- &7Shows the plugin version");
-                        lines.add("&e/emoji settings &e- &7Toggle plugin settings");
-
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', String.join("\n", lines)));
-                    } else if(args[0].equalsIgnoreCase("reload")) {
-                        if(sender.hasPermission("chatemojis.reload")) {
-                            long start = System.currentTimeMillis();
-                            try {
-                                reloadConfig();
-                                emojis = EmojiGroup.init(getConfig());
-                            } catch (ConfigException e) {
-                                e.printStackTrace();
-                            }
-                            long interval = System.currentTimeMillis() - start;
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+Long.toString(interval)+"ms)"));
-                        } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-                    } else if(args[0].equalsIgnoreCase("settings")) {
-                        if(sender instanceof Player) {
-                            if(sender.hasPermission("chatemojis.admin")) ((Player) sender).openInventory(settingsWindow.getInventory());
-                            else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-                        } else sender.sendMessage(ChatColor.RED + "Emojis are only available to players.");
-                    } else if(args[0].toLowerCase().matches("^v(?:er(?:sion)?)?$")) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7This server is currently running &eChatEmojis &7(v"+getDescription().getVersion()+")"));
-                    else sender.sendMessage(ChatColor.RED + "Unknown argument. Try \"/emoji help\" for a list of commands.");
-                } else sender.sendMessage(ChatColor.RED + "Too many arguments. Try \"/emoji help\" for a list of commands.");
-            } else sender.sendMessage(ChatColor.RED + "You don't have enough permission to use this command.");
-            return true;
-        });
+        assert command != null;
+        command.setExecutor(commandHandler);
+        command.setTabCompleter(commandHandler);
     }
 
     @NotNull
@@ -135,6 +79,34 @@ public final class ChatEmojis extends JavaPlugin {
 
     static ChatEmojis getInstance() {
         return plugin;
+    }
+
+    /**
+     * Replaces emoticons to emojis in the message
+     * <br><br><i>(<b>NOTE</b>: Not forced; Limitations and permissions will be checked)</i>
+     * @param player the player who sent the message
+     * @param message the message to parse
+     * @return the parsed message
+     */
+    public String parseEmojis(@NonNull Player player, @NonNull String message) {
+        return parseEmojis(player, message, false);
+    }
+
+    /**
+     * Replaces emoticons to emojis in the message
+     * @param player The player who sent the message
+     * @param message The message to parse
+     * @param force Whether to bypass permissions and limitations
+     * @return The parsed message
+     */
+    public String parseEmojis(@NonNull Player player, @NonNull String message, boolean force) {
+        return emojis.parse(
+                ParsingContext.builder()
+                    .player(player)
+                    .message(message)
+                    .forced(force)
+                    .build()
+                ).getMessage();
     }
 
 }
