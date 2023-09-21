@@ -1,11 +1,11 @@
 package com.rmjtromp.chatemojis;
 
-import com.rmjtromp.chatemojis.exceptions.ConfigException;
 import com.rmjtromp.chatemojis.utils.BukkitUtils;
 import com.rmjtromp.chatemojis.utils.ComponentBuilder;
 import com.rmjtromp.chatemojis.utils.Version;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
@@ -29,7 +29,7 @@ class CommandHandler implements CommandExecutor, TabCompleter {
 
     private static final String help_message = ChatColor.translateAlternateColorCodes('&', String.join("\n", Arrays.asList(
         "&6ChatEmojis &7- &fList of Commands",
-        "&e/emoji [list] &e- &7Shows a list of all emojis",
+        "&e/emoji [list] [page] &e- &7Shows a list of all emojis",
         "&e/emoji dump &e- &7Dump relevant debugging information",
         "&e/emoji help &e- &7Shows this list of commands",
         "&e/emoji reload &e- &7Reloads all emojis",
@@ -42,8 +42,9 @@ class CommandHandler implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if(sender.hasPermission("chatemojis.command") || sender.hasPermission("chatemojis.list")) {
-            if(args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("list"))) {
+            if(args.length == 0 || args.length <= 2 && args[0].equalsIgnoreCase("list")) {
                 if(sender instanceof Player) {
+
                     ComponentBuilder builder = new ComponentBuilder("&6ChatEmojis &7(v"+PLUGIN.getDescription().getVersion()+")\n");
 
                     BaseComponent[] hoverMessage = new ComponentBuilder("&6ChatEmojis\n&7Version: &e"+PLUGIN.getDescription().getVersion()+"\n&7Author: &eRMJTromp\n\n&eClick to open spigot resource page.").create();
@@ -61,11 +62,84 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                         PLUGIN.emojis.getComponents((Player) sender).forEach(baseComponents -> player.spigot().sendMessage(baseComponents));
                     } else {
                         List<BaseComponent[]> components = PLUGIN.emojis.getComponents((Player) sender);
-                        for(int i = 0; i < components.size(); i++) {
+
+                        // Pages
+                        final int messagesPerPage = 20;
+                        int page = 1;
+                        if(args.length > 1) {
+                            try {
+                                page = Math.max(1, Integer.parseInt(args[1]));
+                            } catch (NumberFormatException ignored) {}
+                        }
+                        final int lastPage = (components.size() - 1) / messagesPerPage + 1;
+                        page = Math.min(page, lastPage);
+
+                        final int pageEnd = page * messagesPerPage;
+                        final int pageStart = pageEnd - messagesPerPage;
+
+                        for(int i = pageStart; i < components.size() && i < pageEnd; i++) {
                             builder.append(components.get(i), ComponentBuilder.FormatRetention.NONE);
-                            if(i != components.size() - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+                            if(i != components.size() - 1 && i != pageEnd - 1) builder.append("\n", ComponentBuilder.FormatRetention.NONE);
                         }
 
+                        if (lastPage != 1) {
+                            builder.append("\n", ComponentBuilder.FormatRetention.NONE);
+
+                            ComponentBuilder paginationBuilder = new ComponentBuilder();
+                            // left chevron
+                            {
+                                boolean firstPage = page == 1;
+                                ChatColor color = firstPage ? ChatColor.GRAY : ChatColor.GOLD;
+                                ComponentBuilder leftChevron = new ComponentBuilder(color + " «  ");
+
+                                if(!firstPage) {
+                                    BaseComponent[] previousPageHoverMessage = new ComponentBuilder(
+                                            String.format("§f/emoji list %s", page - 1)
+                                    ).create();
+
+                                    // new Text(BaseComponent[]) is not added until 1.16
+                                    HoverEvent previousPageHoverEvent;
+                                    if(Version.getServerVersion().isOlderThan(Version.V1_16)) previousPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, previousPageHoverMessage);
+                                    else previousPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(previousPageHoverMessage));
+                                    leftChevron.event(previousPageHoverEvent);
+
+                                    leftChevron.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/emoji list " + (page - 1)));
+                                }
+
+                                paginationBuilder.append(leftChevron.create(), ComponentBuilder.FormatRetention.NONE);
+                            }
+
+                            // pagination
+                            paginationBuilder.append(
+                                    String.format("§fPage §e%s§7/%s", page, lastPage),
+                                    ComponentBuilder.FormatRetention.NONE
+                            );
+
+                            {
+                                // right chevron
+                                boolean isLastPage = page == lastPage;
+                                ChatColor color = isLastPage ? ChatColor.GRAY : ChatColor.GOLD;
+                                ComponentBuilder rightChevron = new ComponentBuilder(color + "  » ");
+
+                                if(!isLastPage) {
+                                    BaseComponent[] nextPageHoverMessage = new ComponentBuilder(
+                                            String.format("§f/emoji list %s", page + 1)
+                                    ).create();
+
+                                    // new Text(BaseComponent[]) is not added until 1.16
+                                    HoverEvent nextPageHoverEvent;
+                                    if(Version.getServerVersion().isOlderThan(Version.V1_16)) nextPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, nextPageHoverMessage);
+                                    else nextPageHoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(nextPageHoverMessage));
+                                    rightChevron.event(nextPageHoverEvent);
+
+                                    rightChevron.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/emoji list " + (page + 1)));
+                                }
+
+                                paginationBuilder.append(rightChevron.create(), ComponentBuilder.FormatRetention.NONE);
+                            }
+
+                            builder.append(paginationBuilder.create(), ComponentBuilder.FormatRetention.NONE);
+                        }
                         player.spigot().sendMessage(builder.create());
                     }
                 } else sender.sendMessage(help_message);
