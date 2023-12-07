@@ -1,11 +1,9 @@
 package com.rmjtromp.chatemojis.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Timer;
@@ -25,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 2.2.1
  * @see YamlConfiguration
  */
+@SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
 public class Config extends YamlConfiguration {
 
     /**
@@ -76,10 +75,11 @@ public class Config extends YamlConfiguration {
 
     private final File file;
 
-    public Config(@NotNull File file) throws IOException, InvalidConfigurationException {
+    private Config(@NotNull File file) throws IOException, InvalidConfigurationException {
         this.file = file;
 
-        load(file);
+        FileInputStream stream = new FileInputStream(file);
+        super.load((new InputStreamReader(stream, StandardCharsets.UTF_8)));
     }
 
     private boolean timerIsRunning = false;
