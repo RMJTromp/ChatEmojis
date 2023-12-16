@@ -155,7 +155,7 @@ class PluginListeners implements Listener {
                             @Override
                             public void channelRead(ChannelHandlerContext ctx, Object o) throws Exception {
                                 try {
-                                    if(o.isCustomPayLoadPacket()) {
+                                    if(o.isCustomPayLoadPacket() && PLUGIN.useInAnvils.getNonNullValue()) {
                                         CustomPayLoadPacket payload = o.asCustomPayloadPacket();
                                         ActiveContainer activeContainer = handle.getActiveContainer();
                                         if(payload.getId().equals("MC|ItemName") && activeContainer.isAnvil()) {
@@ -198,7 +198,7 @@ class PluginListeners implements Listener {
                 @EventHandler
                 public void onPrepareAnvil(PrepareAnvilEvent e) {
                     ItemStack item = e.getResult();
-                    if(item != null) {
+                    if(PLUGIN.useInAnvils.getNonNullValue() && item != null) {
                         String input = e.getInventory().getRenameText();
                         if(Strings.isNullOrEmpty(input) || e.getViewers().isEmpty()) return;
 

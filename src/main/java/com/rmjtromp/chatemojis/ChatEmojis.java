@@ -28,7 +28,7 @@ public final class ChatEmojis extends JavaPlugin {
     EmojiGroup emojis = null;
     private static ChatEmojis plugin;
     boolean papiIsLoaded = false;
-    public final ConfigurationReference<Boolean> useOnSigns, useInBooks;
+    public final ConfigurationReference<Boolean> useOnSigns, useInBooks, useInAnvils;
     public final ConfigurationReference<Integer> maxEmojisPerMessage, maxDuplicateEmojis;
     SettingsWindow settingsWindow = null;
 
@@ -41,6 +41,7 @@ public final class ChatEmojis extends JavaPlugin {
 
         useInBooks = config.reference("settings.use.books", true);
         useOnSigns = config.reference("settings.use.signs", true);
+        useInAnvils = config.reference("settings.use.anvils", true);
 
         // disabled until stable & working
         maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", -1);
