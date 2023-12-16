@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 2.2.1
  * @see YamlConfiguration
  */
-@SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
+@SuppressWarnings({"unused"})
 public class Config extends YamlConfiguration {
 
     /**
