@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
+import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -79,7 +80,7 @@ public final class BukkitUtils {
      * @return The class
      * @throws ClassNotFoundException Thrown if class could not be found
      */
-    public static Class<?> getClass(@NotNull String string) throws ClassNotFoundException {
+    public static Class<?> getClass(@Pattern("^.+?\\.%s\\..+$") @NotNull String string) throws ClassNotFoundException {
         return Class.forName(String.format(string, BukkitUtils.getServerVersion()));
     }
 
