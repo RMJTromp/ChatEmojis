@@ -155,7 +155,7 @@ class PluginListeners implements Listener {
                             @Override
                             public void channelRead(ChannelHandlerContext ctx, Object o) throws Exception {
                                 try {
-                                    if(o.isCustomPayLoadPacket()) {
+                                    if(o.isCustomPayLoadPacket() && PLUGIN.useInAnvils.getNonNullValue()) {
                                         CustomPayLoadPacket payload = o.asCustomPayloadPacket();
                                         ActiveContainer activeContainer = handle.getActiveContainer();
                                         if(payload.getId().equals("MC|ItemName") && activeContainer.isAnvil()) {
@@ -164,7 +164,11 @@ class PluginListeners implements Listener {
                                             Slot slot = activeContainer.getSlot(2);
 
                                             if(!StringUtils.isBlank(input) && slot.hasItem()) {
-                                                String newName = ChatEmojis.getInstance().parseEmojis(e.getPlayer(), input);
+                                                String newName = PLUGIN.emojis.parse(ParsingContext.builder()
+                                                    .player(e.getPlayer())
+                                                    .message(input)
+                                                    .build()
+                                                ).getMessage();
 
                                                 if(!newName.equals(input)) {
                                                     slot.getItem().setName(newName);
@@ -194,11 +198,16 @@ class PluginListeners implements Listener {
                 @EventHandler
                 public void onPrepareAnvil(PrepareAnvilEvent e) {
                     ItemStack item = e.getResult();
-                    if(item != null) {
+                    if(PLUGIN.useInAnvils.getNonNullValue() && item != null) {
                         String input = e.getInventory().getRenameText();
                         if(Strings.isNullOrEmpty(input) || e.getViewers().isEmpty()) return;
 
-                        String newName = PLUGIN.parseEmojis((Player) e.getViewers().get(0), input);
+                        String newName = PLUGIN.emojis.parse(ParsingContext.builder()
+                            .player((Player) e.getViewers().get(0))
+                            .message(input)
+                            .build()
+                        ).getMessage();
+
                         if(!newName.equals(input)) {
                             ItemMeta meta = item.getItemMeta();
                             if(meta == null) return;
