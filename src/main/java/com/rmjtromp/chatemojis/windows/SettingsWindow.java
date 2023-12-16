@@ -21,7 +21,7 @@ public class SettingsWindow extends Window {
 
     private final ChatEmojis PLUGIN;
 
-    private final ItemStack BOOK, SIGN, CLOSE;
+    private final ItemStack BOOK, SIGN, ANVIL, CLOSE;
 
     @Nullable
     private final Sound PLING_SOUND;
@@ -58,6 +58,15 @@ public class SettingsWindow extends Window {
         signMeta.setLore(signLore);
         SIGN.setItemMeta(signMeta);
 
+        ANVIL = new ItemStack(Material.ANVIL);
+        ItemMeta anvilMeta = ANVIL.getItemMeta();
+        assert anvilMeta != null;
+        anvilMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lAnvils"));
+        List<String> anvilLore = new ArrayList<>();
+        Arrays.asList("&7Click this item to toggle whether or not", "&7emojis can be used in anvils.").forEach(lore -> anvilLore.add(ChatColor.translateAlternateColorCodes('&', lore)));
+        anvilMeta.setLore(anvilLore);
+        ANVIL.setItemMeta(anvilMeta);
+
         Sound plingSound = null;
         for(String s : new String[]{"NOTE_PLING", "BLOCK_NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING"}) {
             try {
@@ -74,12 +83,14 @@ public class SettingsWindow extends Window {
 
         final boolean
             useInBooks = Boolean.TRUE.equals(PLUGIN.useInBooks.getValue()),
-            useOnSigns = Boolean.TRUE.equals(PLUGIN.useOnSigns.getValue());
+            useOnSigns = Boolean.TRUE.equals(PLUGIN.useOnSigns.getValue()),
+            useInAnvils = Boolean.TRUE.equals(PLUGIN.useInAnvils.getValue());
 
         final ItemStack
             close = CLOSE.clone(),
             book = BOOK.clone(),
-            sign = SIGN.clone();
+            sign = SIGN.clone(),
+            anvil = ANVIL.clone();
 
         setItemEvents(4, close).onClick(e -> e.getWhoClicked().closeInventory());
 
@@ -116,6 +127,25 @@ public class SettingsWindow extends Window {
 
             setItemEvents(1, sign).onClick(e -> {
                 PLUGIN.useOnSigns.setValue(!useOnSigns);
+                if(PLING_SOUND != null) ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), PLING_SOUND, 1f, 1f);
+                build();
+            });
+        }
+
+        {
+            ItemMeta anvilMeta = anvil.getItemMeta();
+            assert anvilMeta != null;
+
+            List<String> lores = anvilMeta.hasLore() ? anvilMeta.getLore() : new ArrayList<>();
+            assert lores != null;
+            lores.add("§7");
+            lores.add(useInAnvils ? "§a§lENABLED" : "§c§lDISABLED");
+            anvilMeta.setLore(lores);
+
+            anvil.setItemMeta(anvilMeta);
+
+            setItemEvents(2, anvil).onClick(e -> {
+                PLUGIN.useInAnvils.setValue(!useInAnvils);
                 if(PLING_SOUND != null) ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), PLING_SOUND, 1f, 1f);
                 build();
             });
