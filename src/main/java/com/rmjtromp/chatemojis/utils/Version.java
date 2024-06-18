@@ -24,6 +24,7 @@ public enum Version {
     V1_18,
     V1_19,
     V1_20,
+    V1_21,
     UNSUPPORTED("Unsupported");
 
     private static Version serverVersion = null;
