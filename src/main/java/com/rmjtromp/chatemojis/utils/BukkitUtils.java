@@ -33,8 +33,14 @@ public final class BukkitUtils {
      * Returns the server version for reflection use
      * @return Server Version
      */
+    private static boolean hasVersionInPackageName = true;
     public static String getServerVersion() {
-        return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        try {
+            return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            hasVersionInPackageName = false;
+            return "v" + Bukkit.getBukkitVersion().replace(".", "_");
+        }
     }
 
     /**
@@ -81,7 +87,12 @@ public final class BukkitUtils {
      * @throws ClassNotFoundException Thrown if class could not be found
      */
     public static Class<?> getClass(@Pattern("^.+?\\.%s\\..+$") @NotNull String string) throws ClassNotFoundException {
-        return Class.forName(String.format(string, BukkitUtils.getServerVersion()));
+        String version = BukkitUtils.getServerVersion();
+
+        if(hasVersionInPackageName)
+            return Class.forName(String.format(string, version));
+
+        return Class.forName(string.replace(".%s", ""));
     }
 
 }
