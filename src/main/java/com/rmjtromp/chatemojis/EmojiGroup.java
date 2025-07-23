@@ -11,7 +11,9 @@ import org.bukkit.permissions.PermissionDefault;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static com.rmjtromp.chatemojis.ChatEmojis.NAME_PATTERN;
 import static com.rmjtromp.chatemojis.ChatEmojis.RESERVED_NAMES;
@@ -103,14 +105,26 @@ public class EmojiGroup {
     }
 
     public ParsingContext parse(@NonNull ParsingContext ctx) {
-        for(EmojiGroup group : getGroups()) {
-            group.parse(ctx);
-            if(ctx.hasReachedGlobalLimit()) return ctx;
+        HashMap<Emoji, Integer> hits = new HashMap<>();
+
+        for (Emoji emoji : getEmojis(true)) {
+            if(!emoji.isEnabled()) continue;
+            if(!ctx.isForced() && !ctx.getPlayer().hasPermission(emoji.getPermission())) continue;
+
+            int res = emoji.messureHit(ctx.getMessage());
+            if(res > 0) hits.put(emoji, res);
         }
 
-        for(Emoji emoji : getEmojis()) {
-            emoji.parse(ctx);
-            if(ctx.hasReachedGlobalLimit()) return ctx;
+        if(hits.isEmpty()) return ctx;
+
+        List<Emoji> emojis = hits.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
+
+        while(!emojis.isEmpty()) {
+            emojis.remove(0)._parse(ctx);
+            if(ctx.hasReachedGlobalLimit()) break;
         }
 
         return ctx;
@@ -121,7 +135,6 @@ public class EmojiGroup {
         for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message, forced);
         for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message, forced);
         return message;
-
     }
 
     public List<BaseComponent[]> getComponents(@NotNull Player player) {
