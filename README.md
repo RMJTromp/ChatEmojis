@@ -40,6 +40,40 @@ A full tutorial and detailed explanation on how to create your own emoji can be 
 # Emoji List (Screenshot)
 ![List of Emojis](https://i.imgur.com/B0s6wga.png)
 
+# For Developers
+If you want to parse emojis in your own plugin you can use the ChatEmojis API.
+You need to add ChatEmojis as a dependency in your plugin's `pom.xml` file:
+```xml
+<repositories>
+    <repository>
+        <id>RMJTromp</id>
+        <url>https://repo.rmjtromp.com/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.rmjtromp</groupId>
+        <artifactId>ChatEmojis</artifactId>
+        <version>2.4.2</version> <!-- Update this version to the latest one -->
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
+
+You can then use ChatEmojis' instance to call the parse method:
+```java
+import com.rmjtromp.chatemojis.ChatEmojis;
+
+ChatEmojis chatEmojis = (ChatEmojis) Bukkit.getPluginManager().getPlugin("ChatEmojis");
+
+Player player = null; // the player who the message is being parsed for
+String message = "..."; // the message to parse
+boolean force = player.isOp(); // whether to force parsing regardless of permissions
+
+String parsedMessage = chatEmojis.parseEmojis(player, message, force);
+```
+
 # Official Resouce Links
 [SpigotMC](https://www.spigotmc.org/resources/chatemojis.88027/)
 

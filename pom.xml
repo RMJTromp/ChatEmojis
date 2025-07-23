@@ -23,6 +23,19 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>rmjtromp</id>
+			<name>releases</name>
+			<url>ftp://192.168.178.94</url>
+		</repository>
+		<snapshotRepository>
+			<id>rmjtromp</id>
+			<name>snapshots</name>
+			<url>ftp://192.168.178.94</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -59,7 +72,22 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- Plugin to generate source JAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -70,6 +98,14 @@
 				</includes>
 			</resource>
 		</resources>
+
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ftp</artifactId>
+				<version>3.5.3</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<repositories>
