@@ -74,8 +74,8 @@
 
 	<repositories>
 		<repository>
-			<id>RMJTromp</id>
-			<url>https://repo.rmjtromp.com/</url>
+			<id>PaperMC</id>
+			<url>https://repo.papermc.io/repository/maven-public/</url>
 		</repository>
 
 		<repository>
