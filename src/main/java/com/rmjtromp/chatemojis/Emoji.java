@@ -71,7 +71,7 @@ public class Emoji {
             if(intLimit < -1) intLimit = -1;
         }
         this.limit = intLimit;
-        
+
         boolean emoticonFound = false;
         for(String key : section.getKeys(false)) {
             if(key.toLowerCase().matches("^emoticons?$")) {
@@ -166,11 +166,11 @@ public class Emoji {
     public String getEmoji() {
         return getEmojis().size() > 1 ? getEmojis().get(random.nextInt(getEmojis().size())) : getEmojis().get(0);
     }
-    
+
     public void enable() {
     	enabled = true;
     }
-    
+
     public void disable() {
     	enabled = false;
     }
@@ -183,11 +183,7 @@ public class Emoji {
         return getLimit() != -1;
     }
 
-    public ParsingContext parse(@NonNull ParsingContext ctx) {
-        if(!isEnabled()) return ctx;
-        if(!ctx.getPlayer().hasPermission(getPermission()) && !ctx.isForced()) return ctx;
-//        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
-
+    ParsingContext _parse(@NotNull ParsingContext ctx) {
         Matcher matcher = getPattern().matcher(ctx.getMessage());
         while(matcher.find()) {
             final String replacement = ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(ctx.getPlayer(), getEmoji())) + ctx.getResetColor();
@@ -203,6 +199,27 @@ public class Emoji {
         }
 
         return ctx;
+    }
+
+    public ParsingContext parse(@NonNull ParsingContext ctx) {
+        if(!isEnabled()) return ctx;
+        if(!ctx.getPlayer().hasPermission(getPermission()) && !ctx.isForced()) return ctx;
+//        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
+        return _parse(ctx);
+    }
+
+    int messureHit(@NotNull String message) {
+        if(!isEnabled()) return -1;
+
+        Matcher matcher = getPattern().matcher(message);
+        int hitLength = -1;
+        while(matcher.find()) {
+            String match = matcher.group();
+            if(match.length() > hitLength)
+                hitLength = match.length();
+        }
+
+        return hitLength;
     }
 
     @Deprecated
