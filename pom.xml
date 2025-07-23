@@ -74,24 +74,18 @@
 
 	<repositories>
 		<repository>
-			<id>spigotmc-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+			<id>RMJTromp</id>
+			<url>https://repo.rmjtromp.com/</url>
 		</repository>
+
 		<repository>
-			<id>sonatype</id>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
-		<repository>
-			<id>placeholderapi</id>
-			<url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-		</repository>
+
 		<repository>
 			<id>essentials-releases</id>
 			<url>https://repo.essentialsx.net/releases/</url>
-		</repository>
-		<repository>
-			<id>paper-repo</id>
-			<url>https://papermc.io/repo/repository/maven-public/</url>
 		</repository>
 	</repositories>
 
@@ -99,7 +93,7 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.16.4-R0.1-SNAPSHOT</version>
+			<version>1.16.5-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -111,11 +105,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>me.clip</groupId>
-			<artifactId>placeholderapi</artifactId>
+			<groupId>com.github.PlaceholderAPI</groupId>
+			<artifactId>PlaceholderAPI</artifactId>
 			<version>2.10.9</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>net.essentialsx</groupId>
 			<artifactId>EssentialsX</artifactId>
@@ -135,6 +130,7 @@
 			<version>1.18.24</version>
 			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
