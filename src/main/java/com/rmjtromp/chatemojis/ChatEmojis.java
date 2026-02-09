@@ -13,6 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPluginLoader;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -36,7 +39,6 @@ public final class ChatEmojis extends JavaPlugin {
 
     public ChatEmojis() throws IOException, InvalidConfigurationException {
         plugin = this;
-
         BukkitUtils.init(this);
 
         config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
@@ -46,6 +48,23 @@ public final class ChatEmojis extends JavaPlugin {
         useInAnvils = config.reference("settings.use.anvils", true);
 
         // disabled until stable & working
+        maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", -1);
+        maxDuplicateEmojis = config.reference("settings.max-duplicate-emojis", -1);
+    }
+
+    // Constructor for MockBukkit compatibility
+    protected ChatEmojis(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
+            throws IOException, InvalidConfigurationException {
+        super(loader, description, dataFolder, file);
+        plugin = this;
+        BukkitUtils.init(this);
+
+        config = Config.init(new File(getDataFolder(), "config.yml"), "config.yml");
+
+        useInBooks = config.reference("settings.use.books", true);
+        useOnSigns = config.reference("settings.use.signs", true);
+        useInAnvils = config.reference("settings.use.anvils", true);
+
         maxEmojisPerMessage = config.reference("settings.max-emojis-per-message", -1);
         maxDuplicateEmojis = config.reference("settings.max-duplicate-emojis", -1);
     }
@@ -64,7 +83,9 @@ public final class ChatEmojis extends JavaPlugin {
         settingsWindow = new SettingsWindow(this);
         papiIsLoaded = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
 
-        getServer().getPluginManager().registerEvents(new PluginListeners(), this);
+        PluginListeners listeners = new PluginListeners();
+        getServer().getPluginManager().registerEvents(listeners, this);
+        listeners.registerAnvilListeners();
 
         CommandHandler commandHandler = new CommandHandler();
         PluginCommand command = getCommand("emoji");

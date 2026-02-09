@@ -43,7 +43,9 @@ class PluginListeners implements Listener {
 
     private final Listener ESSENTIALS_LISTENER = new Listeners.Essentials();
 
-    PluginListeners() {
+    PluginListeners() {}
+
+    void registerAnvilListeners() {
         // if version is 1.10 or older
         if(Version.getServerVersion().isOlderThan(Version.V1_11)) {
             // if version is 1.8 or newer

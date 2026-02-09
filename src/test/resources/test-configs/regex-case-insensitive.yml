@@ -1,0 +1,4 @@
+test:
+  emoticon: ':test:'
+  emoji: 'TEST'
+  regex: '/:test:/i'

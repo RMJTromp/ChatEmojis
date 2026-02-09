@@ -1,0 +1,8 @@
+group1:
+  basic:
+    heart:
+      emoticon: '<3'
+      emoji: '❤'
+    star:
+      emoticon: ':star:'
+      emoji: '★'
