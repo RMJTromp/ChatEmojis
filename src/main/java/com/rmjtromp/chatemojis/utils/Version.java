@@ -1,5 +1,6 @@
 package com.rmjtromp.chatemojis.utils;
 
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,7 +26,8 @@ public enum Version {
     V1_21,
     UNSUPPORTED("Unsupported");
 
-    private static Version serverVersion = null;
+    @Getter(lazy = true)
+    private static final Version serverVersion = initServerVersion();
     private final String string;
 
     Version() {
@@ -40,18 +42,17 @@ public enum Version {
      * Returns the {@link Version} enumeration of the server version
      * @return The server's {@link Version}
      */
-    public static Version getServerVersion() {
-        if(serverVersion != null) return serverVersion;
+    private static Version initServerVersion() {
         String v = BukkitUtils.getServerVersion().substring(1);
         for(Version version : Version.values()) {
-            if(v.startsWith(version.toString().replace(".", "_"))) return (serverVersion = version);
+            if(v.startsWith(version.toString().replace(".", "_"))) return version;
         }
 
         // get plugin logger and log unsupported version
         BukkitUtils.getPlugin().getLogger().warning("Unsupported server version: " + v);
         BukkitUtils.getPlugin().getLogger().warning("This server is running unsupported/untested version of Minecraft, and is considered 'run at own risk', with limited to no support.");
 
-        return (serverVersion = UNSUPPORTED);
+        return UNSUPPORTED;
     }
 
     /**
