@@ -1,6 +1,7 @@
 package com.rmjtromp.chatemojis.utils;
 
 import com.google.common.collect.Iterables;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
@@ -34,16 +35,15 @@ public final class BukkitUtils {
      * @return Server Version
      */
     private static boolean hasVersionInPackageName = true;
-    private static String cachedServerVersion = null;
-    public static String getServerVersion() {
-        if(cachedServerVersion != null) return cachedServerVersion;
+    @Getter(lazy = true)
+    private static final String serverVersion = initServerVersion();
+    private static String initServerVersion() {
         try {
-            cachedServerVersion = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+            return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         } catch (ArrayIndexOutOfBoundsException e) {
             hasVersionInPackageName = false;
-            cachedServerVersion = "v" + Bukkit.getBukkitVersion().replace(".", "_");
+            return "v" + Bukkit.getBukkitVersion().replace(".", "_");
         }
-        return cachedServerVersion;
     }
 
     /**
