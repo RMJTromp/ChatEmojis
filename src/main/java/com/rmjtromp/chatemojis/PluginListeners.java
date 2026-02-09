@@ -60,11 +60,7 @@ class PluginListeners implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-        e.setMessage(PLUGIN.emojis.parse(ParsingContext.builder()
-            .player(e.getPlayer())
-            .message(e.getMessage())
-            .build()
-        ).getMessage());
+        e.setMessage(PLUGIN.parseEmojis(e.getPlayer(), e.getMessage()));
     }
 
     @EventHandler
@@ -96,12 +92,8 @@ class PluginListeners implements Listener {
         if(PLUGIN.useOnSigns.getNonNullValue()) {
             for(int i = 0; i < e.getLines().length; i++) {
                 String line = e.getLine(i);
-                assert line != null;
-                e.setLine(i, PLUGIN.emojis.parse(ParsingContext.builder()
-                    .player(e.getPlayer())
-                    .message(e.getLine(i))
-                    .build()
-                ).getMessage());
+                if(line == null || line.isEmpty()) continue;
+                e.setLine(i, PLUGIN.parseEmojis(e.getPlayer(), line));
             }
         }
     }
@@ -111,11 +103,7 @@ class PluginListeners implements Listener {
         if(PLUGIN.useInBooks.getNonNullValue()) {
             List<String> newContent = new ArrayList<>();
             BookMeta meta = e.getNewBookMeta();
-            meta.getPages().forEach(string -> newContent.add(PLUGIN.emojis.parse(ParsingContext.builder()
-                .player(e.getPlayer())
-                .message(string)
-                .build()
-            ).getMessage()));
+            meta.getPages().forEach(page -> newContent.add(PLUGIN.parseEmojis(e.getPlayer(), page)));
             meta.setPages(newContent);
             e.setNewBookMeta(meta);
         }
@@ -164,11 +152,7 @@ class PluginListeners implements Listener {
                                             Slot slot = activeContainer.getSlot(2);
 
                                             if(!StringUtils.isBlank(input) && slot.hasItem()) {
-                                                String newName = PLUGIN.emojis.parse(ParsingContext.builder()
-                                                    .player(e.getPlayer())
-                                                    .message(input)
-                                                    .build()
-                                                ).getMessage();
+                                                String newName = PLUGIN.parseEmojis(e.getPlayer(), input);
 
                                                 if(!newName.equals(input)) {
                                                     slot.getItem().setName(newName);
@@ -181,13 +165,13 @@ class PluginListeners implements Listener {
                                         }
                                     }
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    PLUGIN.getLogger().log(java.util.logging.Level.WARNING, "Error processing anvil packet", ex);
                                 }
                                 super.channelRead(ctx, o);
                             }
                         });
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        PLUGIN.getLogger().log(java.util.logging.Level.WARNING, "Error setting up anvil listener for player", ex);
                     }
                 }
 
@@ -202,11 +186,7 @@ class PluginListeners implements Listener {
                         String input = e.getInventory().getRenameText();
                         if(Strings.isNullOrEmpty(input) || e.getViewers().isEmpty()) return;
 
-                        String newName = PLUGIN.emojis.parse(ParsingContext.builder()
-                            .player((Player) e.getViewers().get(0))
-                            .message(input)
-                            .build()
-                        ).getMessage();
+                        String newName = PLUGIN.parseEmojis((Player) e.getViewers().get(0), input);
 
                         if(!newName.equals(input)) {
                             ItemMeta meta = item.getItemMeta();
@@ -228,11 +208,7 @@ class PluginListeners implements Listener {
             @EventHandler(ignoreCancelled = true)
             public void onPrivateMessagePreSend(PrivateMessagePreSendEvent e) {
                 if(e.getSender() instanceof User) {
-                    e.setMessage(PLUGIN.emojis.parse(ParsingContext.builder()
-                        .player(((User) e.getSender()).getBase())
-                        .message(e.getMessage())
-                        .build()
-                    ).getMessage());
+                    e.setMessage(PLUGIN.parseEmojis(((User) e.getSender()).getBase(), e.getMessage()));
                 }
             }
 

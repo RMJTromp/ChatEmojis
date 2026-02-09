@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public final class ChatEmojis extends JavaPlugin {
@@ -53,7 +55,7 @@ public final class ChatEmojis extends JavaPlugin {
         try {
             emojis = EmojiGroup.init(getConfig());
         } catch (ConfigException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE, "Failed to load emoji configuration", e);
         }
     }
 
@@ -67,7 +69,7 @@ public final class ChatEmojis extends JavaPlugin {
         CommandHandler commandHandler = new CommandHandler();
         PluginCommand command = getCommand("emoji");
 
-        assert command != null;
+        Objects.requireNonNull(command, "Command 'emoji' not found in plugin.yml");
         command.setExecutor(commandHandler);
         command.setTabCompleter(commandHandler);
     }

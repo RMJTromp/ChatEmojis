@@ -17,8 +17,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class CommandHandler implements CommandExecutor, TabCompleter {
 
@@ -169,7 +172,8 @@ class CommandHandler implements CommandExecutor, TabCompleter {
                             PLUGIN.getConfig().reload();
                             PLUGIN.emojis = EmojiGroup.init(PLUGIN.getConfig());
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            PLUGIN.getLogger().log(java.util.logging.Level.SEVERE, "Failed to reload config", e);
+                            sender.sendMessage(ChatColor.RED + "Error reloading config: " + e.getMessage());
                         }
                         long interval = System.currentTimeMillis() - start;
                         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eAll emojis and groups have been reloaded &7("+ interval +"ms)"));
@@ -188,7 +192,18 @@ class CommandHandler implements CommandExecutor, TabCompleter {
 
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        return null;
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        if(args.length == 1) {
+            List<String> completions = new ArrayList<>(Arrays.asList("list", "help", "version"));
+            if(commandSender.hasPermission("chatemojis.reload")) completions.add("reload");
+            if(commandSender.hasPermission("chatemojis.admin")) {
+                completions.add("dump");
+                completions.add("settings");
+            }
+            return completions.stream()
+                .filter(c -> c.startsWith(args[0].toLowerCase()))
+                .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

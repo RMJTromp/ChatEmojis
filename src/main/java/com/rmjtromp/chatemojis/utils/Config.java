@@ -6,9 +6,12 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -78,42 +81,35 @@ public class Config extends YamlConfiguration {
     private Config(@NotNull File file) throws IOException, InvalidConfigurationException {
         this.file = file;
 
-        FileInputStream stream = new FileInputStream(file);
-        super.load((new InputStreamReader(stream, StandardCharsets.UTF_8)));
+        try(FileInputStream stream = new FileInputStream(file);
+            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            super.load(reader);
+        }
     }
 
-    private boolean timerIsRunning = false;
-    private long lastSave = System.currentTimeMillis();
+    private static final ScheduledExecutorService SAVE_SCHEDULER = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "ChatEmojis-ConfigSave");
+        t.setDaemon(true);
+        return t;
+    });
+    private volatile ScheduledFuture<?> pendingSave = null;
 
     /**
      * Saves the config file after 5 seconds of inactivity.
      * If the config file is saved again, the 5 second timer
      * resets.
      */
-    public void save() {
-        lastSave = System.currentTimeMillis();
-        if(!timerIsRunning) {
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    // if update happened more than 5 seconds ago then save
-                    // otherwise keep checking every 1 second;
-                    // this timer is to prevent spam saving to config
-                    if(System.currentTimeMillis() - lastSave >= 5000L) {
-                        try {
-                            save(file);
-                        } catch (NullPointerException ignore) {
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            timer.cancel();
-                            timerIsRunning = false;
-                        }
-                    }
-                }
-            }, 5100, 1000);
-        }
+    public synchronized void save() {
+        if(pendingSave != null) pendingSave.cancel(false);
+        pendingSave = SAVE_SCHEDULER.schedule(() -> {
+            try {
+                save(file);
+            } catch (IOException e) {
+                BukkitUtils.getPlugin().getLogger().log(Level.SEVERE, "Failed to save config", e);
+            } finally {
+                pendingSave = null;
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -121,10 +117,11 @@ public class Config extends YamlConfiguration {
      * skipping the 5 second timer
      */
     public void forceSave() {
+        if(pendingSave != null) pendingSave.cancel(false);
         try {
             save(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            BukkitUtils.getPlugin().getLogger().log(Level.SEVERE, "Failed to save config", e);
         }
     }
 

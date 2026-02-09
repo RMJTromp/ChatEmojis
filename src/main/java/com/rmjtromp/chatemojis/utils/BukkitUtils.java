@@ -34,13 +34,16 @@ public final class BukkitUtils {
      * @return Server Version
      */
     private static boolean hasVersionInPackageName = true;
+    private static String cachedServerVersion = null;
     public static String getServerVersion() {
+        if(cachedServerVersion != null) return cachedServerVersion;
         try {
-            return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+            cachedServerVersion = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         } catch (ArrayIndexOutOfBoundsException e) {
             hasVersionInPackageName = false;
-            return "v" + Bukkit.getBukkitVersion().replace(".", "_");
+            cachedServerVersion = "v" + Bukkit.getBukkitVersion().replace(".", "_");
         }
+        return cachedServerVersion;
     }
 
     /**

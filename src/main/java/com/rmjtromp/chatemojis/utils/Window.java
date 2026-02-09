@@ -21,76 +21,78 @@ import java.util.function.Consumer;
 
 public abstract class Window  {
 
-    private static final HashMap<Window, Long> WINDOWS = new HashMap<>();
+    private static final HashMap<Inventory, Window> WINDOWS = new HashMap<>();
     private static final Plugin PLUGIN = BukkitUtils.getPlugin();
 
     private static final Listener LISTENER = new Listener() {
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onInventoryClose(InventoryCloseEvent e) {
-            new ArrayList<>(WINDOWS.keySet()).stream().filter(window -> window.inventory.equals(e.getInventory())).forEach(window -> {
-                if(window.onClose != null) window.onClose.accept(e);
-                window.keepAlive();
-            });
+            Window window = WINDOWS.get(e.getInventory());
+            if(window == null) return;
+            if(window.onClose != null) window.onClose.accept(e);
+            window.keepAlive();
         }
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onInventoryOpen(InventoryOpenEvent e) {
-            new ArrayList<>(WINDOWS.keySet()).stream().filter(window -> window.inventory.equals(e.getInventory())).forEach(window -> {
-                window.clear();
-                if(window.onOpen != null) window.onOpen.accept(e);
-                window.build();
-                window.keepAlive();
-            });
+            Window window = WINDOWS.get(e.getInventory());
+            if(window == null) return;
+            window.clear();
+            if(window.onOpen != null) window.onOpen.accept(e);
+            window.build();
+            window.keepAlive();
         }
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onInventoryInteract(InventoryInteractEvent e) {
-            new ArrayList<>(WINDOWS.keySet()).stream().filter(window -> window.inventory.equals(e.getInventory())).forEach(window -> {
-                if(window.onInteract != null) window.onInteract.accept(e);
-                window.keepAlive();
-            });
+            Window window = WINDOWS.get(e.getInventory());
+            if(window == null) return;
+            if(window.onInteract != null) window.onInteract.accept(e);
+            window.keepAlive();
         }
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onInventoryClick(InventoryClickEvent e) {
-            new ArrayList<>(WINDOWS.keySet()).stream().filter(window -> window.inventory.equals(e.getInventory())).forEach(window -> {
-                if(window.cancelClicks) e.setCancelled(true);
-                if(window.onClick != null) window.onClick.accept(e);
-                if(e.getCurrentItem() != null) {
-                    ItemEvents events = window.eventsMap.getOrDefault(e.getCurrentItem(), null);
-                    if(events != null && events.onClick != null) events.onClick.accept(e);
-                }
-                window.keepAlive();
-            });
+            Window window = WINDOWS.get(e.getInventory());
+            if(window == null) return;
+            if(window.cancelClicks) e.setCancelled(true);
+            if(window.onClick != null) window.onClick.accept(e);
+            if(e.getCurrentItem() != null) {
+                ItemEvents events = window.eventsMap.getOrDefault(e.getCurrentItem(), null);
+                if(events != null && events.onClick != null) events.onClick.accept(e);
+            }
+            window.keepAlive();
         }
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onInventoryDrag(InventoryDragEvent e) {
-            new ArrayList<>(WINDOWS.keySet()).stream().filter(window -> window.inventory.equals(e.getInventory())).forEach(window -> {
-                if(window.cancelClicks) e.setCancelled(true);
-                if(window.onDrag != null) window.onDrag.accept(e);
-                ItemEvents events = window.eventsMap.getOrDefault(e.getCursor(), null);
-                if(events != null && events.onDrag != null) events.onDrag.accept(e);
-                window.keepAlive();
-            });
+            Window window = WINDOWS.get(e.getInventory());
+            if(window == null) return;
+            if(window.cancelClicks) e.setCancelled(true);
+            if(window.onDrag != null) window.onDrag.accept(e);
+            ItemEvents events = window.eventsMap.getOrDefault(e.getCursor(), null);
+            if(events != null && events.onDrag != null) events.onDrag.accept(e);
+            window.keepAlive();
         }
 
         @EventHandler
         public void onPluginDisable(PluginDisableEvent e) {
             if(PLUGIN.equals(e.getPlugin()))
-                new ArrayList<>(WINDOWS.keySet()).forEach(Window::destroy);
+                new ArrayList<>(WINDOWS.values()).forEach(Window::destroy);
         }
 
     };
 
+    private long lastActivity = System.currentTimeMillis();
+
     static {
         Bukkit.getPluginManager().registerEvents(LISTENER, PLUGIN);
 
-        // destroy windows which has been inactive for more than 5 minutes and has no viewers
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(PLUGIN, () -> new ArrayList<>(WINDOWS.entrySet()).stream()
-            .filter(entry -> entry.getKey().TTL != -1 && System.currentTimeMillis() - entry.getValue() > entry.getKey().TTL && entry.getKey().getInventory().getViewers().isEmpty())
-            .forEach(entry -> entry.getKey().destroy()), 60 * 20, 60 * 20);
+        // destroy windows which have been inactive for more than their TTL and have no viewers
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(PLUGIN, () -> new ArrayList<>(WINDOWS.values()).stream()
+            .filter(window -> window.TTL != -1 && System.currentTimeMillis() - window.lastActivity > window.TTL && window.getInventory().getViewers().isEmpty())
+            .forEach(Window::destroy), 60 * 20, 60 * 20);
     }
 
     private interface InventoryExclusions {
@@ -124,7 +126,7 @@ public abstract class Window  {
 
     protected Window(@NotNull Inventory inv) {
         this.inventory = inv;
-        WINDOWS.put(this, System.currentTimeMillis());
+        WINDOWS.put(inv, this);
         init();
     }
 
@@ -224,13 +226,12 @@ public abstract class Window  {
     public void destroy() {
         try {
             close();
-            WINDOWS.remove(this);
+            WINDOWS.remove(inventory);
         } catch (Exception ignore) {}
     }
 
     protected void keepAlive() {
-        if(WINDOWS.containsKey(this)) WINDOWS.replace(this, System.currentTimeMillis());
-        else WINDOWS.put(this, System.currentTimeMillis());
+        lastActivity = System.currentTimeMillis();
     }
 
     public void close() {
@@ -241,7 +242,9 @@ public abstract class Window  {
 
     @Override
     public boolean equals(Object o) {
-        return inventory.equals(o);
+        if(this == o) return true;
+        if(!(o instanceof Window)) return false;
+        return inventory.equals(((Window) o).inventory);
     }
 
     @Override

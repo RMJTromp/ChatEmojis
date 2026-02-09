@@ -3,39 +3,38 @@ package com.rmjtromp.chatemojis;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Value;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Builder
-@Value
 public class ParsingContext {
 
     private static final ChatEmojis PLUGIN = ChatEmojis.getInstance();
 
     @Getter
-    Player player;
+    private final Player player;
 
-    String message;
+    private final String message;
 
     @Builder.Default
-    ChatColor resetColor = null;
+    private final ChatColor resetColor = null;
 
     @Getter
     @Builder.Default
-    boolean forced = false;
+    private final boolean forced = false;
 
-    HashMap<Emoji, Integer> useMap = new HashMap<>();
+    @Getter
+    @Builder.Default
+    private final HashMap<Emoji, Integer> useMap = new HashMap<>();
 
-    AtomicReference<String> msg = new AtomicReference<>(null);
+    private String currentMessage;
 
     public String getMessage() {
-        if(msg.get() == null) msg.set(message);
-        return msg.get();
+        if(currentMessage == null) currentMessage = message;
+        return currentMessage;
     }
 
     public String getResetColor() {
@@ -45,7 +44,7 @@ public class ParsingContext {
     }
 
     public void setMessage(@NonNull String message) {
-        msg.set(message);
+        currentMessage = message;
     }
 
     public boolean hasReachedLimit(@NonNull Emoji emoji) {

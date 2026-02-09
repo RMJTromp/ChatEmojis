@@ -1,6 +1,7 @@
 package com.rmjtromp.chatemojis;
 
 import com.rmjtromp.chatemojis.exceptions.ConfigException;
+import com.rmjtromp.chatemojis.utils.BukkitUtils;
 import lombok.NonNull;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -20,8 +21,9 @@ import static com.rmjtromp.chatemojis.ChatEmojis.RESERVED_NAMES;
 
 public class EmojiGroup {
 
-    private final ArrayList<Emoji> emojis = new  ArrayList<>();
+    private final ArrayList<Emoji> emojis = new ArrayList<>();
     private final ArrayList<EmojiGroup> groups = new ArrayList<>();
+    private List<Emoji> allEmojisCache = null;
 
     private final String name;
     private final Permission permission;
@@ -62,11 +64,11 @@ public class EmojiGroup {
             if(!RESERVED_NAMES.contains(key.toLowerCase()) || (parent == null && !key.equalsIgnoreCase("settings"))) {
                 ConfigurationSection s = section.getConfigurationSection(key);
                 if(s == null) continue;
-                if(isSetKey(s, "^emoticons?$") && isSetKey(s, "^emojis?$")) {
+                if(hasKey(s, "emoticon", "emoticons") && hasKey(s, "emoji", "emojis")) {
                     try {
                         emojis.add(Emoji.init(this, s));
                     } catch (ConfigException e) {
-                        System.out.println("[ChatEmoji] There was an error loading emoji: "+e.getMessage());
+                        BukkitUtils.getPlugin().getLogger().warning("There was an error loading emoji: " + e.getMessage());
                     }
                 } else groups.add(new EmojiGroup(this, s));
             }
@@ -85,7 +87,7 @@ public class EmojiGroup {
         return groups;
     }
 
-    public ArrayList<Emoji> getEmojis() {
+    public List<Emoji> getEmojis() {
         return getEmojis(false);
     }
 
@@ -94,14 +96,15 @@ public class EmojiGroup {
      * @param recursively Whether to get emojis recursively
      * @return All emojis
      */
-    public ArrayList<Emoji> getEmojis(boolean recursively) {
-        ArrayList<Emoji> emojis = new ArrayList<>(this.emojis);
+    public List<Emoji> getEmojis(boolean recursively) {
+        if(!recursively) return new ArrayList<>(this.emojis);
 
-        if(recursively) {
-            for(EmojiGroup group : getGroups()) emojis.addAll(group.getEmojis(true));
+        if(allEmojisCache == null) {
+            ArrayList<Emoji> all = new ArrayList<>(this.emojis);
+            for(EmojiGroup group : getGroups()) all.addAll(group.getEmojis(true));
+            allEmojisCache = Collections.unmodifiableList(all);
         }
-
-        return emojis;
+        return allEmojisCache;
     }
 
     public ParsingContext parse(@NonNull ParsingContext ctx) {
@@ -122,19 +125,12 @@ public class EmojiGroup {
             .map(Entry::getKey)
             .collect(Collectors.toList());
 
-        while(!emojis.isEmpty()) {
-            emojis.remove(0)._parse(ctx);
+        for(Emoji emoji : emojis) {
+            emoji._parse(ctx);
             if(ctx.hasReachedGlobalLimit()) break;
         }
 
         return ctx;
-    }
-
-    @Deprecated
-    public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
-        for(EmojiGroup group : getGroups()) message = group.parse(player, resetColor, message, forced);
-        for(Emoji emoji : getEmojis()) message = emoji.parse(player, resetColor, message, forced);
-        return message;
     }
 
     public List<BaseComponent[]> getComponents(@NotNull Player player) {
@@ -144,9 +140,11 @@ public class EmojiGroup {
         return components;
     }
 
-    private boolean isSetKey(ConfigurationSection section, String regex) {
+    private static boolean hasKey(ConfigurationSection section, String... names) {
         for(String key : section.getKeys(false)) {
-            if(key.toLowerCase().matches(regex)) return true;
+            for(String name : names) {
+                if(key.equalsIgnoreCase(name)) return true;
+            }
         }
         return false;
     }

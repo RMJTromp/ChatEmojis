@@ -65,7 +65,7 @@ public class ReflectionUtils {
                         modifiersField.setAccessible(true);
                         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
                     } catch(NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-                        e.printStackTrace();
+                        BukkitUtils.getPlugin().getLogger().log(java.util.logging.Level.WARNING, "Failed to remove final modifier from field", e);
                     }
                 }
             }
@@ -136,7 +136,7 @@ public class ReflectionUtils {
                     methods.removeAll(dupes);
                     methods.add(m);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    BukkitUtils.getPlugin().getLogger().log(java.util.logging.Level.WARNING, "Error deduplicating methods", e);
                 }
             }
         }};

@@ -2,8 +2,6 @@ package com.rmjtromp.chatemojis.utils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 /**
  * @author RMJTromp
  * @since 2.2.1
@@ -71,7 +69,7 @@ public enum Version {
      * @return Whether version is older
      */
     public boolean isOlderThan(@NotNull Version version) {
-        return Arrays.asList(Version.values()).indexOf(this) < Arrays.asList(Version.values()).indexOf(version);
+        return this.ordinal() < version.ordinal();
     }
 
     /**
@@ -81,7 +79,7 @@ public enum Version {
      * @return Whether version is newer
      */
     public boolean isNewerThan(@NotNull Version version) {
-        return Arrays.asList(Version.values()).indexOf(this) > Arrays.asList(Version.values()).indexOf(version);
+        return this.ordinal() > version.ordinal();
     }
 
 

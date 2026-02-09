@@ -74,10 +74,10 @@ public class Emoji {
 
         boolean emoticonFound = false;
         for(String key : section.getKeys(false)) {
-            if(key.toLowerCase().matches("^emoticons?$")) {
+            if(key.equalsIgnoreCase("emoticon") || key.equalsIgnoreCase("emoticons")) {
                 if(section.isString(key) || section.isInt(key)) {
-                    String emoticon = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
-                    assert emoticon != null;
+                    String emoticon = Objects.requireNonNull(
+                        section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key)));
                     if(!emoticon.isEmpty()) emoticons.add(emoticon);
                     else throw new InvalidEmoticonException("Emoticon can not be empty", section);
                 } else if(section.isList(key)) {
@@ -103,8 +103,7 @@ public class Emoji {
         for(String key : section.getKeys(false)) {
             if(key.equalsIgnoreCase("regex")) {
                 if(section.isString(key)) {
-                    String value = section.getString(key);
-                    assert value != null;
+                    String value = Objects.requireNonNull(section.getString(key));
                     Matcher m = REGEX_PATTERN.matcher(value);
                     if(m.matches()) {
                         pattern = m.group(2) != null ? Pattern.compile(m.group(1), Pattern.CASE_INSENSITIVE) : Pattern.compile(m.group(1));
@@ -120,10 +119,10 @@ public class Emoji {
 
         boolean emojiFound = false;
         for(String key : section.getKeys(false)) {
-            if(key.toLowerCase().matches("^emojis?$")) {
+            if(key.equalsIgnoreCase("emoji") || key.equalsIgnoreCase("emojis")) {
                 if(section.isString(key) || section.isInt(key)) {
-                    String emoji = section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key));
-                    assert emoji != null;
+                    String emoji = Objects.requireNonNull(
+                        section.isString(key) ? section.getString(key) : Integer.toString(section.getInt(key)));
                     if(!emoji.isEmpty()) emojis.add(ChatColor.translateAlternateColorCodes('&', StringEscapeUtils.unescapeJava(emoji)));
                     else throw new InvalidEmojiException("Emoji can not be empty", section);
                 } else if(section.isList(key)) {
@@ -185,17 +184,30 @@ public class Emoji {
 
     ParsingContext _parse(@NotNull ParsingContext ctx) {
         Matcher matcher = getPattern().matcher(ctx.getMessage());
-        while(matcher.find()) {
-            final String replacement = ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(ctx.getPlayer(), getEmoji())) + ctx.getResetColor();
+        final boolean multipleEmojis = getEmojis().size() > 1;
+        final String resetColor = ctx.getResetColor();
 
-            if(getEmojis().size() > 1) {
+        if(!multipleEmojis) {
+            // Single emoji: resolve PAPI once and replaceAll in one pass
+            String emojiStr = getEmoji();
+            if(PLUGIN.papiIsLoaded) emojiStr = PlaceholderAPI.setPlaceholders(ctx.getPlayer(), emojiStr);
+            final String replacement = ChatColor.RESET + emojiStr + resetColor;
+
+            if(matcher.find()) {
+                ctx.setMessage(matcher.replaceAll(replacement));
+                ctx.getUseMap().compute(this, (k, v) -> v == null ? 1 : v + 1);
+            }
+        } else {
+            // Multiple emojis: replace one at a time with random selection
+            while(matcher.find()) {
+                String emojiStr = getEmoji();
+                if(PLUGIN.papiIsLoaded) emojiStr = PlaceholderAPI.setPlaceholders(ctx.getPlayer(), emojiStr);
+                final String replacement = ChatColor.RESET + emojiStr + resetColor;
+
                 ctx.setMessage(matcher.replaceFirst(replacement));
                 matcher = getPattern().matcher(ctx.getMessage());
-            } else
-                ctx.setMessage(matcher.replaceAll(replacement));
-
-            ctx.getUseMap().compute(this, (k, v) -> v == null ? 1 : v + 1);
-//            if((ctx.hasReachedLimit(this) || ctx.hasReachedGlobalLimit()) && !ctx.isForced()) break;
+                ctx.getUseMap().compute(this, (k, v) -> v == null ? 1 : v + 1);
+            }
         }
 
         return ctx;
@@ -204,7 +216,6 @@ public class Emoji {
     public ParsingContext parse(@NonNull ParsingContext ctx) {
         if(!isEnabled()) return ctx;
         if(!ctx.getPlayer().hasPermission(getPermission()) && !ctx.isForced()) return ctx;
-//        if(ctx.hasReachedGlobalLimit() || ctx.hasReachedLimit(this)) return ctx;
         return _parse(ctx);
     }
 
@@ -222,26 +233,12 @@ public class Emoji {
         return hitLength;
     }
 
-    @Deprecated
-    public String parse(@NotNull Player player, @NotNull String resetColor, @NotNull String message, boolean forced) {
-        if(isEnabled() && (forced || player.hasPermission(getPermission()))) {
-            Matcher matcher = getPattern().matcher(message);
-            while(matcher.find()) {
-                if(getEmojis().size() > 1) {
-                    message = matcher.replaceFirst(ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
-                    matcher = getPattern().matcher(message);
-                } else message = matcher.replaceAll(ChatColor.RESET + (!PLUGIN.papiIsLoaded ? getEmoji() : PlaceholderAPI.setPlaceholders(player, getEmoji())) + resetColor);
-            }
-        }
-        return message;
-    }
-
-    @SuppressWarnings("deprecation")
     public List<BaseComponent[]> getComponents(@NotNull Player player) {
         List<BaseComponent[]> components = new ArrayList<>();
         emoticons.forEach(emoticon -> {
-            // parse the message and ignore whether the player has the right permissions or not
-            ComponentBuilder builder = new ComponentBuilder(String.format("&7  - &e%s &7- &f%s", emoticon, parse(player, ChatColor.RESET+"", emoticon, true)));
+            // parse the message with force=true to show the result regardless of permissions
+            String parsed = PLUGIN.parseEmojis(player, emoticon, true);
+            ComponentBuilder builder = new ComponentBuilder(String.format("&7  - &e%s &7- &f%s", emoticon, parsed));
 
             // add hover and click events if player has admin permissions
             if(player.hasPermission("chatemojis.admin")) {
